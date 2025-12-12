@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"authMicro/internal/service"
 	"authMicro/utlis/logger"
 
 	"net/http"
@@ -12,7 +13,7 @@ type Login struct {
 	logger logger.Logger
 }
 
-func NewLoginHandler(logger logger.Logger) *Login {
+func NewLoginHandler(logger logger.Logger, service service.LoginService) *Login {
 	return &Login{
 		logger: logger,
 	}

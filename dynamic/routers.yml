@@ -1,0 +1,13 @@
+http:
+  routers:
+    auth-service:
+      rule: "PathPrefix(`/auth`)"
+      service: auth-service
+      entryPoints:
+        - web
+
+#    user-service:
+#      rule: "PathPrefix(`/user`)"
+#      service: user-service
+#      entryPoints:
+#        - web

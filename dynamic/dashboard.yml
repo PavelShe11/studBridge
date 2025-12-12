@@ -1,0 +1,15 @@
+http:
+  routers:
+    dashboard:
+      rule: "Host(`dashboard.localhost`)"
+      service: "api@internal"
+      entryPoints:
+        - web
+      middlewares:
+        - dashboard-auth
+
+  middlewares:
+    dashboard-auth:
+      basicAuth:
+        users:
+          - "admin:$apr1$Ix/DNcdM$Q4h9gndRrltOLSIKsv5fx1"

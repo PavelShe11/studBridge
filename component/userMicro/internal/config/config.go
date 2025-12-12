@@ -8,10 +8,14 @@ import (
 )
 
 type Config struct {
-	DB                     DBConfig
-	JWT                    JWTConfig
-	HttpServerAddr         string
-	AccountServiceGrpcAddr string
+	Grpc GRPCConfig
+	Http HTTPConfig
+	DB   DBConfig
+	JWT  JWTConfig
+}
+
+type GRPCConfig struct {
+	ServerAddr string
 }
 
 type HTTPConfig struct {
@@ -36,6 +40,12 @@ type JWTConfig struct {
 func NewConfig() (*Config, []error) {
 	errors := make([]error, 0)
 	return &Config{
+		Grpc: GRPCConfig{
+			ServerAddr: getEnv("GrpcServerAddr", "0.0.0.0:9092"),
+		},
+		Http: HTTPConfig{
+			ServerAddr: getEnv("HttpServerAddr", "0.0.0.0:80"),
+		},
 		DB: DBConfig{
 			Host:     getEnvIsRequiredWithErrors("DBHost", &errors),
 			Port:     getEnv("DBPort", "5432"),
@@ -49,8 +59,6 @@ func NewConfig() (*Config, []error) {
 			RefreshTokenExpiration: time.Duration(getEnvIsRequiredWithErrorsAsInt("JWTRefreshTokenExpiration", &errors)) * time.Millisecond,
 			Secret:                 getEnvIsRequiredWithErrors("JWTSecret", &errors),
 		},
-		HttpServerAddr:         getEnv("HttpServerAddr", "0.0.0.0:80"),
-		AccountServiceGrpcAddr: getEnvIsRequiredWithErrors("AccountServiceGrpcAddr", &errors),
 	}, errors
 }
 

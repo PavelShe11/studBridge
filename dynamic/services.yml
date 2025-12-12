@@ -1,0 +1,19 @@
+http:
+  services:
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://auth-service:80"
+        healthCheck:
+          path: "/auth/v1/health"
+          interval: "10s"
+          timeout: "3s"
+
+#    user-service:
+#      loadBalancer:
+#        servers:
+#          - url: "http://user-service:80"
+#        healthCheck:
+#          path: "/health"
+#          interval: "10s"
+#          timeout: "3s"

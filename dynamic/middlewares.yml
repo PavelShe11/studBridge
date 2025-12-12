@@ -1,0 +1,11 @@
+#http:
+#  middlewares:
+#    strip-auth-prefix:
+#      stripPrefix:
+#        prefixes:
+#          - /auth
+#
+#    strip-networking-prefix:
+#      stripPrefix:
+#        prefixes:
+#          - /networking

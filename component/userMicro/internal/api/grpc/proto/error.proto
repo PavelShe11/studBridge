@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option go_package = "userMicro/internal/api/grpc/proto";
+
+message ErrorResponse {
+  string error = 1;
+  repeated FieldError detailedErrors = 2;
+}
+
+message FieldError {
+  string field = 1;
+  string message = 2;
+}

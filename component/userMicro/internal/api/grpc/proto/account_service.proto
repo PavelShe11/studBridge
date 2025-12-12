@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+option go_package = "userMicro/internal/api/grpc/proto";
+
+import "google/protobuf/struct.proto";
+import "error.proto";
+
+service AccountService {
+  rpc createAccount(CreateAccountRequest) returns (CreateAccountResponse) {}
+  rpc getAccountInfoByEmail(GetAccountInfoByEmailRequest) returns (GetAccountInfoResponse) {}
+  rpc getAccountById(GetAccountByIdRequest) returns (GetAccountInfoResponse) {}
+  rpc validateUserData(ValidateUserDataRequest) returns (ValidateUserDataResponse) {}
+}
+
+message ValidateUserDataRequest {
+  map<string, google.protobuf.Value> userData = 1;
+}
+
+message ValidateUserDataResponse {
+  bool accept = 1;
+  string error = 2;
+  repeated FieldError detailedErrors = 3;
+}
+
+message GetAccountInfoByEmailRequest {
+  string email = 1;
+}
+
+message GetAccountByIdRequest {
+  string accountId = 1;
+}
+
+message GetAccountInfoResponse {
+  map<string, google.protobuf.Value> userData = 1;
+}
+
+message CreateAccountRequest {
+  map<string, google.protobuf.Value> userData = 1;
+}
+
+message CreateAccountResponse {
+  oneof result {
+    SuccessResponse success = 1;
+    ErrorResponse error = 2;
+  }
+}
+
+message SuccessResponse {
+  string message = 1;
+}
