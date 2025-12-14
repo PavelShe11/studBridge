@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: error.proto
 
-package proto
+package grpc
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -21,28 +21,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ErrorResponse struct {
+type Error struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
 	Error          string                 `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
-	DetailedErrors []*FieldError          `protobuf:"bytes,2,rep,name=detailedErrors,proto3" json:"detailedErrors,omitempty"`
+	DetailedErrors []*Error_FieldError    `protobuf:"bytes,2,rep,name=detailedErrors,proto3" json:"detailedErrors,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
 }
 
-func (x *ErrorResponse) Reset() {
-	*x = ErrorResponse{}
+func (x *Error) Reset() {
+	*x = Error{}
 	mi := &file_error_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ErrorResponse) String() string {
+func (x *Error) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ErrorResponse) ProtoMessage() {}
+func (*Error) ProtoMessage() {}
 
-func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
+func (x *Error) ProtoReflect() protoreflect.Message {
 	mi := &file_error_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,47 +54,47 @@ func (x *ErrorResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ErrorResponse.ProtoReflect.Descriptor instead.
-func (*ErrorResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use Error.ProtoReflect.Descriptor instead.
+func (*Error) Descriptor() ([]byte, []int) {
 	return file_error_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ErrorResponse) GetError() string {
+func (x *Error) GetError() string {
 	if x != nil {
 		return x.Error
 	}
 	return ""
 }
 
-func (x *ErrorResponse) GetDetailedErrors() []*FieldError {
+func (x *Error) GetDetailedErrors() []*Error_FieldError {
 	if x != nil {
 		return x.DetailedErrors
 	}
 	return nil
 }
 
-type FieldError struct {
+type Error_FieldError struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Field         string                 `protobuf:"bytes,1,opt,name=field,proto3" json:"field,omitempty"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *FieldError) Reset() {
-	*x = FieldError{}
+func (x *Error_FieldError) Reset() {
+	*x = Error_FieldError{}
 	mi := &file_error_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *FieldError) String() string {
+func (x *Error_FieldError) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*FieldError) ProtoMessage() {}
+func (*Error_FieldError) ProtoMessage() {}
 
-func (x *FieldError) ProtoReflect() protoreflect.Message {
+func (x *Error_FieldError) ProtoReflect() protoreflect.Message {
 	mi := &file_error_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -106,19 +106,19 @@ func (x *FieldError) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use FieldError.ProtoReflect.Descriptor instead.
-func (*FieldError) Descriptor() ([]byte, []int) {
-	return file_error_proto_rawDescGZIP(), []int{1}
+// Deprecated: Use Error_FieldError.ProtoReflect.Descriptor instead.
+func (*Error_FieldError) Descriptor() ([]byte, []int) {
+	return file_error_proto_rawDescGZIP(), []int{0, 0}
 }
 
-func (x *FieldError) GetField() string {
+func (x *Error_FieldError) GetName() string {
 	if x != nil {
-		return x.Field
+		return x.Name
 	}
 	return ""
 }
 
-func (x *FieldError) GetMessage() string {
+func (x *Error_FieldError) GetMessage() string {
 	if x != nil {
 		return x.Message
 	}
@@ -129,14 +129,14 @@ var File_error_proto protoreflect.FileDescriptor
 
 const file_error_proto_rawDesc = "" +
 	"\n" +
-	"\verror.proto\"Z\n" +
-	"\rErrorResponse\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\tR\x05error\x123\n" +
-	"\x0edetailedErrors\x18\x02 \x03(\v2\v.FieldErrorR\x0edetailedErrors\"<\n" +
+	"\verror.proto\"\x94\x01\n" +
+	"\x05Error\x12\x14\n" +
+	"\x05error\x18\x01 \x01(\tR\x05error\x129\n" +
+	"\x0edetailedErrors\x18\x02 \x03(\v2\x11.Error.FieldErrorR\x0edetailedErrors\x1a:\n" +
 	"\n" +
-	"FieldError\x12\x14\n" +
-	"\x05field\x18\x01 \x01(\tR\x05field\x12\x18\n" +
-	"\amessage\x18\x02 \x01(\tR\amessageB#Z!userMicro/internal/api/grpc/protob\x06proto3"
+	"FieldError\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessageB\x1dZ\x1buserMicro/internal/api/grpcb\x06proto3"
 
 var (
 	file_error_proto_rawDescOnce sync.Once
@@ -152,11 +152,11 @@ func file_error_proto_rawDescGZIP() []byte {
 
 var file_error_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_error_proto_goTypes = []any{
-	(*ErrorResponse)(nil), // 0: ErrorResponse
-	(*FieldError)(nil),    // 1: FieldError
+	(*Error)(nil),            // 0: Error
+	(*Error_FieldError)(nil), // 1: Error.FieldError
 }
 var file_error_proto_depIdxs = []int32{
-	1, // 0: ErrorResponse.detailedErrors:type_name -> FieldError
+	1, // 0: Error.detailedErrors:type_name -> Error.FieldError
 	1, // [1:1] is the sub-list for method output_type
 	1, // [1:1] is the sub-list for method input_type
 	1, // [1:1] is the sub-list for extension type_name

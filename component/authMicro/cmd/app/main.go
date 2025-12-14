@@ -48,7 +48,7 @@ func main() {
 	altsTC := alts.NewClientCreds(alts.DefaultClientOptions())
 	conn, err := g.NewClient(cfg.AccountServiceGrpcAddr, g.WithTransportCredentials(altsTC))
 	if err != nil {
-		l.Fatalf("Failed to initialize account service: %v", err)
+		l.Fatalf("Failed to initialize account accountGrpcService: %v", err)
 	}
 
 	accountServiceClient := grpc.NewAccountServiceClient(conn)

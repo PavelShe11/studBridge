@@ -19,10 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	AccountService_CreateAccount_FullMethodName         = "/AccountService/createAccount"
-	AccountService_GetAccountInfoByEmail_FullMethodName = "/AccountService/getAccountInfoByEmail"
-	AccountService_GetAccountById_FullMethodName        = "/AccountService/getAccountById"
-	AccountService_ValidateUserData_FullMethodName      = "/AccountService/validateUserData"
+	AccountService_CreateAccount_FullMethodName       = "/AccountService/createAccount"
+	AccountService_GetAccountByEmail_FullMethodName   = "/AccountService/getAccountByEmail"
+	AccountService_GetAccountById_FullMethodName      = "/AccountService/getAccountById"
+	AccountService_ValidateAccountData_FullMethodName = "/AccountService/validateAccountData"
 )
 
 // AccountServiceClient is the client API for AccountService service.
@@ -30,9 +30,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AccountServiceClient interface {
 	CreateAccount(ctx context.Context, in *CreateAccountRequest, opts ...grpc.CallOption) (*CreateAccountResponse, error)
-	GetAccountInfoByEmail(ctx context.Context, in *GetAccountInfoByEmailRequest, opts ...grpc.CallOption) (*GetAccountInfoResponse, error)
-	GetAccountById(ctx context.Context, in *GetAccountByIdRequest, opts ...grpc.CallOption) (*GetAccountInfoResponse, error)
-	ValidateUserData(ctx context.Context, in *ValidateUserDataRequest, opts ...grpc.CallOption) (*ValidateUserDataResponse, error)
+	GetAccountByEmail(ctx context.Context, in *GetAccountByEmailRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
+	GetAccountById(ctx context.Context, in *GetAccountByIdRequest, opts ...grpc.CallOption) (*GetAccountResponse, error)
+	ValidateAccountData(ctx context.Context, in *ValidateAccountRequest, opts ...grpc.CallOption) (*ValidateAccountResponse, error)
 }
 
 type accountServiceClient struct {
@@ -53,19 +53,19 @@ func (c *accountServiceClient) CreateAccount(ctx context.Context, in *CreateAcco
 	return out, nil
 }
 
-func (c *accountServiceClient) GetAccountInfoByEmail(ctx context.Context, in *GetAccountInfoByEmailRequest, opts ...grpc.CallOption) (*GetAccountInfoResponse, error) {
+func (c *accountServiceClient) GetAccountByEmail(ctx context.Context, in *GetAccountByEmailRequest, opts ...grpc.CallOption) (*GetAccountResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetAccountInfoResponse)
-	err := c.cc.Invoke(ctx, AccountService_GetAccountInfoByEmail_FullMethodName, in, out, cOpts...)
+	out := new(GetAccountResponse)
+	err := c.cc.Invoke(ctx, AccountService_GetAccountByEmail_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *accountServiceClient) GetAccountById(ctx context.Context, in *GetAccountByIdRequest, opts ...grpc.CallOption) (*GetAccountInfoResponse, error) {
+func (c *accountServiceClient) GetAccountById(ctx context.Context, in *GetAccountByIdRequest, opts ...grpc.CallOption) (*GetAccountResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetAccountInfoResponse)
+	out := new(GetAccountResponse)
 	err := c.cc.Invoke(ctx, AccountService_GetAccountById_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -73,10 +73,10 @@ func (c *accountServiceClient) GetAccountById(ctx context.Context, in *GetAccoun
 	return out, nil
 }
 
-func (c *accountServiceClient) ValidateUserData(ctx context.Context, in *ValidateUserDataRequest, opts ...grpc.CallOption) (*ValidateUserDataResponse, error) {
+func (c *accountServiceClient) ValidateAccountData(ctx context.Context, in *ValidateAccountRequest, opts ...grpc.CallOption) (*ValidateAccountResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ValidateUserDataResponse)
-	err := c.cc.Invoke(ctx, AccountService_ValidateUserData_FullMethodName, in, out, cOpts...)
+	out := new(ValidateAccountResponse)
+	err := c.cc.Invoke(ctx, AccountService_ValidateAccountData_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -88,9 +88,9 @@ func (c *accountServiceClient) ValidateUserData(ctx context.Context, in *Validat
 // for forward compatibility.
 type AccountServiceServer interface {
 	CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error)
-	GetAccountInfoByEmail(context.Context, *GetAccountInfoByEmailRequest) (*GetAccountInfoResponse, error)
-	GetAccountById(context.Context, *GetAccountByIdRequest) (*GetAccountInfoResponse, error)
-	ValidateUserData(context.Context, *ValidateUserDataRequest) (*ValidateUserDataResponse, error)
+	GetAccountByEmail(context.Context, *GetAccountByEmailRequest) (*GetAccountResponse, error)
+	GetAccountById(context.Context, *GetAccountByIdRequest) (*GetAccountResponse, error)
+	ValidateAccountData(context.Context, *ValidateAccountRequest) (*ValidateAccountResponse, error)
 	mustEmbedUnimplementedAccountServiceServer()
 }
 
@@ -104,14 +104,14 @@ type UnimplementedAccountServiceServer struct{}
 func (UnimplementedAccountServiceServer) CreateAccount(context.Context, *CreateAccountRequest) (*CreateAccountResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method CreateAccount not implemented")
 }
-func (UnimplementedAccountServiceServer) GetAccountInfoByEmail(context.Context, *GetAccountInfoByEmailRequest) (*GetAccountInfoResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method GetAccountInfoByEmail not implemented")
+func (UnimplementedAccountServiceServer) GetAccountByEmail(context.Context, *GetAccountByEmailRequest) (*GetAccountResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method GetAccountByEmail not implemented")
 }
-func (UnimplementedAccountServiceServer) GetAccountById(context.Context, *GetAccountByIdRequest) (*GetAccountInfoResponse, error) {
+func (UnimplementedAccountServiceServer) GetAccountById(context.Context, *GetAccountByIdRequest) (*GetAccountResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetAccountById not implemented")
 }
-func (UnimplementedAccountServiceServer) ValidateUserData(context.Context, *ValidateUserDataRequest) (*ValidateUserDataResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "method ValidateUserData not implemented")
+func (UnimplementedAccountServiceServer) ValidateAccountData(context.Context, *ValidateAccountRequest) (*ValidateAccountResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method ValidateAccountData not implemented")
 }
 func (UnimplementedAccountServiceServer) mustEmbedUnimplementedAccountServiceServer() {}
 func (UnimplementedAccountServiceServer) testEmbeddedByValue()                        {}
@@ -152,20 +152,20 @@ func _AccountService_CreateAccount_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AccountService_GetAccountInfoByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAccountInfoByEmailRequest)
+func _AccountService_GetAccountByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccountByEmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServiceServer).GetAccountInfoByEmail(ctx, in)
+		return srv.(AccountServiceServer).GetAccountByEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AccountService_GetAccountInfoByEmail_FullMethodName,
+		FullMethod: AccountService_GetAccountByEmail_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServiceServer).GetAccountInfoByEmail(ctx, req.(*GetAccountInfoByEmailRequest))
+		return srv.(AccountServiceServer).GetAccountByEmail(ctx, req.(*GetAccountByEmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -188,20 +188,20 @@ func _AccountService_GetAccountById_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AccountService_ValidateUserData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ValidateUserDataRequest)
+func _AccountService_ValidateAccountData_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateAccountRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AccountServiceServer).ValidateUserData(ctx, in)
+		return srv.(AccountServiceServer).ValidateAccountData(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AccountService_ValidateUserData_FullMethodName,
+		FullMethod: AccountService_ValidateAccountData_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AccountServiceServer).ValidateUserData(ctx, req.(*ValidateUserDataRequest))
+		return srv.(AccountServiceServer).ValidateAccountData(ctx, req.(*ValidateAccountRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -218,16 +218,16 @@ var AccountService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AccountService_CreateAccount_Handler,
 		},
 		{
-			MethodName: "getAccountInfoByEmail",
-			Handler:    _AccountService_GetAccountInfoByEmail_Handler,
+			MethodName: "getAccountByEmail",
+			Handler:    _AccountService_GetAccountByEmail_Handler,
 		},
 		{
 			MethodName: "getAccountById",
 			Handler:    _AccountService_GetAccountById_Handler,
 		},
 		{
-			MethodName: "validateUserData",
-			Handler:    _AccountService_ValidateUserData_Handler,
+			MethodName: "validateAccountData",
+			Handler:    _AccountService_ValidateAccountData_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

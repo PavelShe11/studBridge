@@ -4,9 +4,12 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	proto "userMicro/internal/api/grpc"
+	"userMicro/internal/api/grpc"
+	"userMicro/internal/api/grpc/accountGrpcService"
 	"userMicro/internal/config"
+	"userMicro/internal/repository"
 	"userMicro/internal/repository/db"
+	"userMicro/internal/service"
 	"userMicro/utlis/logger"
 
 	"github.com/jmoiron/sqlx"
@@ -37,7 +40,11 @@ func main() {
 		l.Fatalf("Failed to initialize database schema: %v", err)
 	}
 
-	grpcServer := proto.NewGRPCServer(cfg.Grpc, l)
+	accountRepository := repository.NewAccountRepository(pg)
+
+	accountService := service.NewAccountService(accountRepository)
+
+	grpcServer := grpc.NewGRPCServer(cfg.Grpc, l)
 	go func() {
 		if err := grpcServer.Start(); err != nil {
 			l.Fatalf("Failed to start grpc server: %v", err)
@@ -47,6 +54,8 @@ func main() {
 		grpcServer.Stop()
 		l.Info("Server gracefully stopped")
 	}()
+
+	accountGrpcService.Register(grpcServer.Server, *accountService)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

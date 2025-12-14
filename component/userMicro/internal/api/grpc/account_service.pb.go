@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: account_service.proto
 
-package proto
+package grpc
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -22,27 +22,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type ValidateUserDataRequest struct {
+type ValidateAccountRequest struct {
 	state         protoimpl.MessageState     `protogen:"open.v1"`
 	UserData      map[string]*structpb.Value `protobuf:"bytes,1,rep,name=userData,proto3" json:"userData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateUserDataRequest) Reset() {
-	*x = ValidateUserDataRequest{}
+func (x *ValidateAccountRequest) Reset() {
+	*x = ValidateAccountRequest{}
 	mi := &file_account_service_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateUserDataRequest) String() string {
+func (x *ValidateAccountRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateUserDataRequest) ProtoMessage() {}
+func (*ValidateAccountRequest) ProtoMessage() {}
 
-func (x *ValidateUserDataRequest) ProtoReflect() protoreflect.Message {
+func (x *ValidateAccountRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_account_service_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -54,41 +54,39 @@ func (x *ValidateUserDataRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateUserDataRequest.ProtoReflect.Descriptor instead.
-func (*ValidateUserDataRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateAccountRequest.ProtoReflect.Descriptor instead.
+func (*ValidateAccountRequest) Descriptor() ([]byte, []int) {
 	return file_account_service_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *ValidateUserDataRequest) GetUserData() map[string]*structpb.Value {
+func (x *ValidateAccountRequest) GetUserData() map[string]*structpb.Value {
 	if x != nil {
 		return x.UserData
 	}
 	return nil
 }
 
-type ValidateUserDataResponse struct {
-	state          protoimpl.MessageState `protogen:"open.v1"`
-	Accept         bool                   `protobuf:"varint,1,opt,name=accept,proto3" json:"accept,omitempty"`
-	Error          string                 `protobuf:"bytes,2,opt,name=error,proto3" json:"error,omitempty"`
-	DetailedErrors []*FieldError          `protobuf:"bytes,3,rep,name=detailedErrors,proto3" json:"detailedErrors,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+type ValidateAccountResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Error         *Error                 `protobuf:"bytes,1,opt,name=error,proto3,oneof" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ValidateUserDataResponse) Reset() {
-	*x = ValidateUserDataResponse{}
+func (x *ValidateAccountResponse) Reset() {
+	*x = ValidateAccountResponse{}
 	mi := &file_account_service_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ValidateUserDataResponse) String() string {
+func (x *ValidateAccountResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ValidateUserDataResponse) ProtoMessage() {}
+func (*ValidateAccountResponse) ProtoMessage() {}
 
-func (x *ValidateUserDataResponse) ProtoReflect() protoreflect.Message {
+func (x *ValidateAccountResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_account_service_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -100,53 +98,39 @@ func (x *ValidateUserDataResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ValidateUserDataResponse.ProtoReflect.Descriptor instead.
-func (*ValidateUserDataResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use ValidateAccountResponse.ProtoReflect.Descriptor instead.
+func (*ValidateAccountResponse) Descriptor() ([]byte, []int) {
 	return file_account_service_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ValidateUserDataResponse) GetAccept() bool {
-	if x != nil {
-		return x.Accept
-	}
-	return false
-}
-
-func (x *ValidateUserDataResponse) GetError() string {
+func (x *ValidateAccountResponse) GetError() *Error {
 	if x != nil {
 		return x.Error
-	}
-	return ""
-}
-
-func (x *ValidateUserDataResponse) GetDetailedErrors() []*FieldError {
-	if x != nil {
-		return x.DetailedErrors
 	}
 	return nil
 }
 
-type GetAccountInfoByEmailRequest struct {
+type GetAccountByEmailRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Email         string                 `protobuf:"bytes,1,opt,name=email,proto3" json:"email,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetAccountInfoByEmailRequest) Reset() {
-	*x = GetAccountInfoByEmailRequest{}
+func (x *GetAccountByEmailRequest) Reset() {
+	*x = GetAccountByEmailRequest{}
 	mi := &file_account_service_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetAccountInfoByEmailRequest) String() string {
+func (x *GetAccountByEmailRequest) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAccountInfoByEmailRequest) ProtoMessage() {}
+func (*GetAccountByEmailRequest) ProtoMessage() {}
 
-func (x *GetAccountInfoByEmailRequest) ProtoReflect() protoreflect.Message {
+func (x *GetAccountByEmailRequest) ProtoReflect() protoreflect.Message {
 	mi := &file_account_service_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -158,12 +142,12 @@ func (x *GetAccountInfoByEmailRequest) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAccountInfoByEmailRequest.ProtoReflect.Descriptor instead.
-func (*GetAccountInfoByEmailRequest) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetAccountByEmailRequest.ProtoReflect.Descriptor instead.
+func (*GetAccountByEmailRequest) Descriptor() ([]byte, []int) {
 	return file_account_service_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *GetAccountInfoByEmailRequest) GetEmail() string {
+func (x *GetAccountByEmailRequest) GetEmail() string {
 	if x != nil {
 		return x.Email
 	}
@@ -214,27 +198,31 @@ func (x *GetAccountByIdRequest) GetAccountId() string {
 	return ""
 }
 
-type GetAccountInfoResponse struct {
-	state         protoimpl.MessageState     `protogen:"open.v1"`
-	UserData      map[string]*structpb.Value `protobuf:"bytes,1,rep,name=userData,proto3" json:"userData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+type GetAccountResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Result:
+	//
+	//	*GetAccountResponse_Account
+	//	*GetAccountResponse_Error
+	Result        isGetAccountResponse_Result `protobuf_oneof:"result"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *GetAccountInfoResponse) Reset() {
-	*x = GetAccountInfoResponse{}
+func (x *GetAccountResponse) Reset() {
+	*x = GetAccountResponse{}
 	mi := &file_account_service_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *GetAccountInfoResponse) String() string {
+func (x *GetAccountResponse) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*GetAccountInfoResponse) ProtoMessage() {}
+func (*GetAccountResponse) ProtoMessage() {}
 
-func (x *GetAccountInfoResponse) ProtoReflect() protoreflect.Message {
+func (x *GetAccountResponse) ProtoReflect() protoreflect.Message {
 	mi := &file_account_service_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -246,17 +234,51 @@ func (x *GetAccountInfoResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use GetAccountInfoResponse.ProtoReflect.Descriptor instead.
-func (*GetAccountInfoResponse) Descriptor() ([]byte, []int) {
+// Deprecated: Use GetAccountResponse.ProtoReflect.Descriptor instead.
+func (*GetAccountResponse) Descriptor() ([]byte, []int) {
 	return file_account_service_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *GetAccountInfoResponse) GetUserData() map[string]*structpb.Value {
+func (x *GetAccountResponse) GetResult() isGetAccountResponse_Result {
 	if x != nil {
-		return x.UserData
+		return x.Result
 	}
 	return nil
 }
+
+func (x *GetAccountResponse) GetAccount() *GetAccountResponse_AccountWrapper {
+	if x != nil {
+		if x, ok := x.Result.(*GetAccountResponse_Account); ok {
+			return x.Account
+		}
+	}
+	return nil
+}
+
+func (x *GetAccountResponse) GetError() *Error {
+	if x != nil {
+		if x, ok := x.Result.(*GetAccountResponse_Error); ok {
+			return x.Error
+		}
+	}
+	return nil
+}
+
+type isGetAccountResponse_Result interface {
+	isGetAccountResponse_Result()
+}
+
+type GetAccountResponse_Account struct {
+	Account *GetAccountResponse_AccountWrapper `protobuf:"bytes,1,opt,name=account,proto3,oneof"`
+}
+
+type GetAccountResponse_Error struct {
+	Error *Error `protobuf:"bytes,2,opt,name=error,proto3,oneof"`
+}
+
+func (*GetAccountResponse_Account) isGetAccountResponse_Result() {}
+
+func (*GetAccountResponse_Error) isGetAccountResponse_Result() {}
 
 type CreateAccountRequest struct {
 	state         protoimpl.MessageState     `protogen:"open.v1"`
@@ -303,12 +325,8 @@ func (x *CreateAccountRequest) GetUserData() map[string]*structpb.Value {
 }
 
 type CreateAccountResponse struct {
-	state protoimpl.MessageState `protogen:"open.v1"`
-	// Types that are valid to be assigned to Result:
-	//
-	//	*CreateAccountResponse_Success
-	//	*CreateAccountResponse_Error
-	Result        isCreateAccountResponse_Result `protobuf_oneof:"result"`
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Error         *Error                 `protobuf:"bytes,1,opt,name=error,proto3,oneof" json:"error,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -343,69 +361,35 @@ func (*CreateAccountResponse) Descriptor() ([]byte, []int) {
 	return file_account_service_proto_rawDescGZIP(), []int{6}
 }
 
-func (x *CreateAccountResponse) GetResult() isCreateAccountResponse_Result {
+func (x *CreateAccountResponse) GetError() *Error {
 	if x != nil {
-		return x.Result
+		return x.Error
 	}
 	return nil
 }
 
-func (x *CreateAccountResponse) GetSuccess() *SuccessResponse {
-	if x != nil {
-		if x, ok := x.Result.(*CreateAccountResponse_Success); ok {
-			return x.Success
-		}
-	}
-	return nil
-}
-
-func (x *CreateAccountResponse) GetError() *ErrorResponse {
-	if x != nil {
-		if x, ok := x.Result.(*CreateAccountResponse_Error); ok {
-			return x.Error
-		}
-	}
-	return nil
-}
-
-type isCreateAccountResponse_Result interface {
-	isCreateAccountResponse_Result()
-}
-
-type CreateAccountResponse_Success struct {
-	Success *SuccessResponse `protobuf:"bytes,1,opt,name=success,proto3,oneof"`
-}
-
-type CreateAccountResponse_Error struct {
-	Error *ErrorResponse `protobuf:"bytes,2,opt,name=error,proto3,oneof"`
-}
-
-func (*CreateAccountResponse_Success) isCreateAccountResponse_Result() {}
-
-func (*CreateAccountResponse_Error) isCreateAccountResponse_Result() {}
-
-type SuccessResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Message       string                 `protobuf:"bytes,1,opt,name=message,proto3" json:"message,omitempty"`
+type GetAccountResponse_AccountWrapper struct {
+	state         protoimpl.MessageState     `protogen:"open.v1"`
+	UserData      map[string]*structpb.Value `protobuf:"bytes,1,rep,name=userData,proto3" json:"userData,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *SuccessResponse) Reset() {
-	*x = SuccessResponse{}
-	mi := &file_account_service_proto_msgTypes[7]
+func (x *GetAccountResponse_AccountWrapper) Reset() {
+	*x = GetAccountResponse_AccountWrapper{}
+	mi := &file_account_service_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *SuccessResponse) String() string {
+func (x *GetAccountResponse_AccountWrapper) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*SuccessResponse) ProtoMessage() {}
+func (*GetAccountResponse_AccountWrapper) ProtoMessage() {}
 
-func (x *SuccessResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_account_service_proto_msgTypes[7]
+func (x *GetAccountResponse_AccountWrapper) ProtoReflect() protoreflect.Message {
+	mi := &file_account_service_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -416,57 +400,57 @@ func (x *SuccessResponse) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use SuccessResponse.ProtoReflect.Descriptor instead.
-func (*SuccessResponse) Descriptor() ([]byte, []int) {
-	return file_account_service_proto_rawDescGZIP(), []int{7}
+// Deprecated: Use GetAccountResponse_AccountWrapper.ProtoReflect.Descriptor instead.
+func (*GetAccountResponse_AccountWrapper) Descriptor() ([]byte, []int) {
+	return file_account_service_proto_rawDescGZIP(), []int{4, 0}
 }
 
-func (x *SuccessResponse) GetMessage() string {
+func (x *GetAccountResponse_AccountWrapper) GetUserData() map[string]*structpb.Value {
 	if x != nil {
-		return x.Message
+		return x.UserData
 	}
-	return ""
+	return nil
 }
 
 var File_account_service_proto protoreflect.FileDescriptor
 
 const file_account_service_proto_rawDesc = "" +
 	"\n" +
-	"\x15account_service.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\verror.proto\"\xb2\x01\n" +
-	"\x17ValidateUserDataRequest\x12B\n" +
-	"\buserData\x18\x01 \x03(\v2&.ValidateUserDataRequest.UserDataEntryR\buserData\x1aS\n" +
+	"\x15account_service.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\verror.proto\"\xb0\x01\n" +
+	"\x16ValidateAccountRequest\x12A\n" +
+	"\buserData\x18\x01 \x03(\v2%.ValidateAccountRequest.UserDataEntryR\buserData\x1aS\n" +
 	"\rUserDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
-	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"}\n" +
-	"\x18ValidateUserDataResponse\x12\x16\n" +
-	"\x06accept\x18\x01 \x01(\bR\x06accept\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error\x123\n" +
-	"\x0edetailedErrors\x18\x03 \x03(\v2\v.FieldErrorR\x0edetailedErrors\"4\n" +
-	"\x1cGetAccountInfoByEmailRequest\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"F\n" +
+	"\x17ValidateAccountResponse\x12!\n" +
+	"\x05error\x18\x01 \x01(\v2\x06.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
+	"\x06_error\"0\n" +
+	"\x18GetAccountByEmailRequest\x12\x14\n" +
 	"\x05email\x18\x01 \x01(\tR\x05email\"5\n" +
 	"\x15GetAccountByIdRequest\x12\x1c\n" +
-	"\taccountId\x18\x01 \x01(\tR\taccountId\"\xb0\x01\n" +
-	"\x16GetAccountInfoResponse\x12A\n" +
-	"\buserData\x18\x01 \x03(\v2%.GetAccountInfoResponse.UserDataEntryR\buserData\x1aS\n" +
+	"\taccountId\x18\x01 \x01(\tR\taccountId\"\xb4\x02\n" +
+	"\x12GetAccountResponse\x12>\n" +
+	"\aaccount\x18\x01 \x01(\v2\".GetAccountResponse.AccountWrapperH\x00R\aaccount\x12\x1e\n" +
+	"\x05error\x18\x02 \x01(\v2\x06.ErrorH\x00R\x05error\x1a\xb3\x01\n" +
+	"\x0eAccountWrapper\x12L\n" +
+	"\buserData\x18\x01 \x03(\v20.GetAccountResponse.AccountWrapper.UserDataEntryR\buserData\x1aS\n" +
 	"\rUserDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
-	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"\xac\x01\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01B\b\n" +
+	"\x06result\"\xac\x01\n" +
 	"\x14CreateAccountRequest\x12?\n" +
 	"\buserData\x18\x01 \x03(\v2#.CreateAccountRequest.UserDataEntryR\buserData\x1aS\n" +
 	"\rUserDataEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12,\n" +
-	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"w\n" +
-	"\x15CreateAccountResponse\x12,\n" +
-	"\asuccess\x18\x01 \x01(\v2\x10.SuccessResponseH\x00R\asuccess\x12&\n" +
-	"\x05error\x18\x02 \x01(\v2\x0e.ErrorResponseH\x00R\x05errorB\b\n" +
-	"\x06result\"+\n" +
-	"\x0fSuccessResponse\x12\x18\n" +
-	"\amessage\x18\x01 \x01(\tR\amessage2\xb5\x02\n" +
+	"\x05value\x18\x02 \x01(\v2\x16.google.protobuf.ValueR\x05value:\x028\x01\"D\n" +
+	"\x15CreateAccountResponse\x12!\n" +
+	"\x05error\x18\x01 \x01(\v2\x06.ErrorH\x00R\x05error\x88\x01\x01B\b\n" +
+	"\x06_error2\xa6\x02\n" +
 	"\x0eAccountService\x12@\n" +
-	"\rcreateAccount\x12\x15.CreateAccountRequest\x1a\x16.CreateAccountResponse\"\x00\x12Q\n" +
-	"\x15getAccountInfoByEmail\x12\x1d.GetAccountInfoByEmailRequest\x1a\x17.GetAccountInfoResponse\"\x00\x12C\n" +
-	"\x0egetAccountById\x12\x16.GetAccountByIdRequest\x1a\x17.GetAccountInfoResponse\"\x00\x12I\n" +
-	"\x10validateUserData\x12\x18.ValidateUserDataRequest\x1a\x19.ValidateUserDataResponse\"\x00B#Z!userMicro/internal/api/grpc/protob\x06proto3"
+	"\rcreateAccount\x12\x15.CreateAccountRequest\x1a\x16.CreateAccountResponse\"\x00\x12E\n" +
+	"\x11getAccountByEmail\x12\x19.GetAccountByEmailRequest\x1a\x13.GetAccountResponse\"\x00\x12?\n" +
+	"\x0egetAccountById\x12\x16.GetAccountByIdRequest\x1a\x13.GetAccountResponse\"\x00\x12J\n" +
+	"\x13validateAccountData\x12\x17.ValidateAccountRequest\x1a\x18.ValidateAccountResponse\"\x00B\x1dZ\x1buserMicro/internal/api/grpcb\x06proto3"
 
 var (
 	file_account_service_proto_rawDescOnce sync.Once
@@ -482,44 +466,44 @@ func file_account_service_proto_rawDescGZIP() []byte {
 
 var file_account_service_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_account_service_proto_goTypes = []any{
-	(*ValidateUserDataRequest)(nil),      // 0: ValidateUserDataRequest
-	(*ValidateUserDataResponse)(nil),     // 1: ValidateUserDataResponse
-	(*GetAccountInfoByEmailRequest)(nil), // 2: GetAccountInfoByEmailRequest
-	(*GetAccountByIdRequest)(nil),        // 3: GetAccountByIdRequest
-	(*GetAccountInfoResponse)(nil),       // 4: GetAccountInfoResponse
-	(*CreateAccountRequest)(nil),         // 5: CreateAccountRequest
-	(*CreateAccountResponse)(nil),        // 6: CreateAccountResponse
-	(*SuccessResponse)(nil),              // 7: SuccessResponse
-	nil,                                  // 8: ValidateUserDataRequest.UserDataEntry
-	nil,                                  // 9: GetAccountInfoResponse.UserDataEntry
-	nil,                                  // 10: CreateAccountRequest.UserDataEntry
-	(*FieldError)(nil),                   // 11: FieldError
-	(*ErrorResponse)(nil),                // 12: ErrorResponse
-	(*structpb.Value)(nil),               // 13: google.protobuf.Value
+	(*ValidateAccountRequest)(nil),            // 0: ValidateAccountRequest
+	(*ValidateAccountResponse)(nil),           // 1: ValidateAccountResponse
+	(*GetAccountByEmailRequest)(nil),          // 2: GetAccountByEmailRequest
+	(*GetAccountByIdRequest)(nil),             // 3: GetAccountByIdRequest
+	(*GetAccountResponse)(nil),                // 4: GetAccountResponse
+	(*CreateAccountRequest)(nil),              // 5: CreateAccountRequest
+	(*CreateAccountResponse)(nil),             // 6: CreateAccountResponse
+	nil,                                       // 7: ValidateAccountRequest.UserDataEntry
+	(*GetAccountResponse_AccountWrapper)(nil), // 8: GetAccountResponse.AccountWrapper
+	nil,                    // 9: GetAccountResponse.AccountWrapper.UserDataEntry
+	nil,                    // 10: CreateAccountRequest.UserDataEntry
+	(*Error)(nil),          // 11: Error
+	(*structpb.Value)(nil), // 12: google.protobuf.Value
 }
 var file_account_service_proto_depIdxs = []int32{
-	8,  // 0: ValidateUserDataRequest.userData:type_name -> ValidateUserDataRequest.UserDataEntry
-	11, // 1: ValidateUserDataResponse.detailedErrors:type_name -> FieldError
-	9,  // 2: GetAccountInfoResponse.userData:type_name -> GetAccountInfoResponse.UserDataEntry
-	10, // 3: CreateAccountRequest.userData:type_name -> CreateAccountRequest.UserDataEntry
-	7,  // 4: CreateAccountResponse.success:type_name -> SuccessResponse
-	12, // 5: CreateAccountResponse.error:type_name -> ErrorResponse
-	13, // 6: ValidateUserDataRequest.UserDataEntry.value:type_name -> google.protobuf.Value
-	13, // 7: GetAccountInfoResponse.UserDataEntry.value:type_name -> google.protobuf.Value
-	13, // 8: CreateAccountRequest.UserDataEntry.value:type_name -> google.protobuf.Value
-	5,  // 9: AccountService.createAccount:input_type -> CreateAccountRequest
-	2,  // 10: AccountService.getAccountInfoByEmail:input_type -> GetAccountInfoByEmailRequest
-	3,  // 11: AccountService.getAccountById:input_type -> GetAccountByIdRequest
-	0,  // 12: AccountService.validateUserData:input_type -> ValidateUserDataRequest
-	6,  // 13: AccountService.createAccount:output_type -> CreateAccountResponse
-	4,  // 14: AccountService.getAccountInfoByEmail:output_type -> GetAccountInfoResponse
-	4,  // 15: AccountService.getAccountById:output_type -> GetAccountInfoResponse
-	1,  // 16: AccountService.validateUserData:output_type -> ValidateUserDataResponse
-	13, // [13:17] is the sub-list for method output_type
-	9,  // [9:13] is the sub-list for method input_type
-	9,  // [9:9] is the sub-list for extension type_name
-	9,  // [9:9] is the sub-list for extension extendee
-	0,  // [0:9] is the sub-list for field type_name
+	7,  // 0: ValidateAccountRequest.userData:type_name -> ValidateAccountRequest.UserDataEntry
+	11, // 1: ValidateAccountResponse.error:type_name -> Error
+	8,  // 2: GetAccountResponse.account:type_name -> GetAccountResponse.AccountWrapper
+	11, // 3: GetAccountResponse.error:type_name -> Error
+	10, // 4: CreateAccountRequest.userData:type_name -> CreateAccountRequest.UserDataEntry
+	11, // 5: CreateAccountResponse.error:type_name -> Error
+	12, // 6: ValidateAccountRequest.UserDataEntry.value:type_name -> google.protobuf.Value
+	9,  // 7: GetAccountResponse.AccountWrapper.userData:type_name -> GetAccountResponse.AccountWrapper.UserDataEntry
+	12, // 8: GetAccountResponse.AccountWrapper.UserDataEntry.value:type_name -> google.protobuf.Value
+	12, // 9: CreateAccountRequest.UserDataEntry.value:type_name -> google.protobuf.Value
+	5,  // 10: Service.createAccount:input_type -> CreateAccountRequest
+	2,  // 11: Service.getAccountByEmail:input_type -> GetAccountByEmailRequest
+	3,  // 12: Service.getAccountById:input_type -> GetAccountByIdRequest
+	0,  // 13: Service.validateAccountData:input_type -> ValidateAccountRequest
+	6,  // 14: Service.createAccount:output_type -> CreateAccountResponse
+	4,  // 15: Service.getAccountByEmail:output_type -> GetAccountResponse
+	4,  // 16: Service.getAccountById:output_type -> GetAccountResponse
+	1,  // 17: Service.validateAccountData:output_type -> ValidateAccountResponse
+	14, // [14:18] is the sub-list for method output_type
+	10, // [10:14] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_account_service_proto_init() }
@@ -528,10 +512,12 @@ func file_account_service_proto_init() {
 		return
 	}
 	file_error_proto_init()
-	file_account_service_proto_msgTypes[6].OneofWrappers = []any{
-		(*CreateAccountResponse_Success)(nil),
-		(*CreateAccountResponse_Error)(nil),
+	file_account_service_proto_msgTypes[1].OneofWrappers = []any{}
+	file_account_service_proto_msgTypes[4].OneofWrappers = []any{
+		(*GetAccountResponse_Account)(nil),
+		(*GetAccountResponse_Error)(nil),
 	}
+	file_account_service_proto_msgTypes[6].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

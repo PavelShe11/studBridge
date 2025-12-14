@@ -2,12 +2,12 @@ http:
   routers:
     auth-service:
       rule: "PathPrefix(`/auth`)"
-      service: auth-service
+      service: auth-accountGrpcService
       entryPoints:
         - web
 
-#    user-service:
+#    user-accountGrpcService:
 #      rule: "PathPrefix(`/user`)"
-#      service: user-service
+#      accountGrpcService: user-accountGrpcService
 #      entryPoints:
 #        - web

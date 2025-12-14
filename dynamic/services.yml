@@ -9,7 +9,7 @@ http:
           interval: "10s"
           timeout: "3s"
 
-#    user-service:
+#    user-accountGrpcService:
 #      loadBalancer:
 #        servers:
 #          - url: "http://user-service:80"

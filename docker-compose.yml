@@ -22,7 +22,7 @@ services:
     build:
       context: ./component/authMicro
       dockerfile: Dockerfile
-    container_name: auth-service
+    container_name: auth-accountGrpcService
     environment:
       DBHost: auth-db-db
       DBName: ${AUTH_PG_DB_NAME}
@@ -30,7 +30,7 @@ services:
       JWTSecret: ${JWT_SECRET}
       JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME}
       JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME}
-      AccountServiceGrpcAddr: user-service:9092
+      AccountServiceGrpcAddr: user-accountGrpcService:9092
     depends_on:
       auth-db-postgres:
         condition: service_healthy
@@ -63,7 +63,7 @@ services:
     build:
       context: ./component/userMicro
       dockerfile: Dockerfile
-    container_name: user-service
+    container_name: user-accountGrpcService
     environment:
       DBHost: user-db-db
       DBName: ${USER_PG_DB_NAME}
@@ -97,6 +97,7 @@ services:
       - user_db_data:/var/lib/postgresql/data
     networks:
       - user-network
+
 
 volumes:
   auth_db_data:
