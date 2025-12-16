@@ -18,6 +18,7 @@ type Service struct {
 func NewGRPCServer(config config.GRPCConfig, logger logger.Logger) *Service {
 	return &Service{
 		address: config.ServerAddr,
+		Server:  grpc.NewServer(),
 		logger:  logger,
 	}
 }
@@ -28,17 +29,14 @@ func (s *Service) Start() error {
 		return err
 	}
 
-	server := grpc.NewServer()
-	reflection.Register(server)
+	reflection.Register(s.Server)
 
-	s.Server = server
-
-	s.logger.Info("grpc Server listening on " + s.address)
-	return server.Serve(lis)
+	s.logger.Info("grpcService Server listening on " + s.address)
+	return s.Server.Serve(lis)
 }
 
 func (s *Service) Stop() {
-	if s.Server == nil {
+	if s.Server != nil {
 		s.logger.Info("Gracefully stopping gRPC Server")
 		s.Server.GracefulStop()
 	}

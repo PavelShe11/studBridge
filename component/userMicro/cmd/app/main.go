@@ -8,7 +8,7 @@ import (
 	"userMicro/internal/api/grpc/accountGrpcService"
 	"userMicro/internal/config"
 	"userMicro/internal/repository"
-	"userMicro/internal/repository/db"
+	"userMicro/internal/repository/database"
 	"userMicro/internal/service"
 	"userMicro/utlis/logger"
 
@@ -25,7 +25,7 @@ func main() {
 		}
 	}
 
-	pg, err := db.NewPostgresDB(cfg.DB)
+	pg, err := database.NewPostgresDB(cfg.DB)
 	if err != nil {
 		l.Fatalf("Failed to initialize database connection: %v", err)
 	}
@@ -36,26 +36,28 @@ func main() {
 		}
 	}(pg)
 	l.Info("Database connection established")
-	if err := db.InitSchema(pg); err != nil {
+	if err := database.InitSchema(pg); err != nil {
 		l.Fatalf("Failed to initialize database schema: %v", err)
 	}
 
 	accountRepository := repository.NewAccountRepository(pg)
 
-	accountService := service.NewAccountService(accountRepository)
+	accountService := service.NewAccountService(accountRepository, l)
 
 	grpcServer := grpc.NewGRPCServer(cfg.Grpc, l)
+
+	// Register service before starting server
+	accountGrpcService.Register(grpcServer.Server, *accountService)
+
 	go func() {
 		if err := grpcServer.Start(); err != nil {
-			l.Fatalf("Failed to start grpc server: %v", err)
+			l.Fatalf("Failed to start grpcService server: %v", err)
 		}
 	}()
 	defer func() {
 		grpcServer.Stop()
 		l.Info("Server gracefully stopped")
 	}()
-
-	accountGrpcService.Register(grpcServer.Server, *accountService)
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

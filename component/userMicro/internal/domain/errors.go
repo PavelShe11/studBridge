@@ -5,7 +5,7 @@ import (
 )
 
 type Error struct {
-	Error       string
+	Name        string
 	FieldErrors []FieldError
 }
 

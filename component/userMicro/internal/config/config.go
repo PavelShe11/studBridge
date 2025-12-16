@@ -49,8 +49,8 @@ func NewConfig() (*Config, []error) {
 		DB: DBConfig{
 			Host:     getEnvIsRequiredWithErrors("DBHost", &errors),
 			Port:     getEnv("DBPort", "5432"),
-			Username: getEnv("DBUsername", "db"),
-			Password: getEnv("DBPassword", "db"),
+			Username: getEnv("DBUsername", "postgres"),
+			Password: getEnv("DBPassword", "postgres"),
 			DBName:   getEnvIsRequiredWithErrors("DBName", &errors),
 			SSLMode:  getEnv("DBSSLMode", "disable"),
 		},

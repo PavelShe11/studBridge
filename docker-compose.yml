@@ -22,15 +22,16 @@ services:
     build:
       context: ./component/authMicro
       dockerfile: Dockerfile
-    container_name: auth-accountGrpcService
+    container_name: auth-service
     environment:
-      DBHost: auth-db-db
+      DBHost: auth-db-postgres
       DBName: ${AUTH_PG_DB_NAME}
       DBUsername: ${AUTH_PG_DB_USER}
+      DBPassword: ${AUTH_PG_DB_PASSWORD}
       JWTSecret: ${JWT_SECRET}
       JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME}
       JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME}
-      AccountServiceGrpcAddr: user-accountGrpcService:9092
+      AccountServiceGrpcAddr: "dns:///user-service:9092"
     depends_on:
       auth-db-postgres:
         condition: service_healthy
@@ -41,17 +42,19 @@ services:
 
   auth-db-postgres:
     image: postgres:16-alpine
-    container_name: auth-db-db
+    container_name: auth-db-postgres
     environment:
       POSTGRES_DB: ${AUTH_PG_DB_NAME}
       POSTGRES_USER: ${AUTH_PG_DB_USER}
-      POSTGRES_PASSWORD: "db"
+      POSTGRES_PASSWORD: ${AUTH_PG_DB_PASSWORD}
       PGSSLMODE: "disable"
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${AUTH_PG_DB_USER}" ]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}
+    ports:
+      - "5433:5432"
     restart: unless-stopped
     volumes:
       - auth_db_data:/var/lib/postgresql/data
@@ -63,16 +66,17 @@ services:
     build:
       context: ./component/userMicro
       dockerfile: Dockerfile
-    container_name: user-accountGrpcService
+    container_name: user-service
     environment:
-      DBHost: user-db-db
+      DBHost: user-db-postgres
       DBName: ${USER_PG_DB_NAME}
-      DBUsername: ${AUTH_PG_DB_USER}
+      DBUsername: ${USER_PG_DB_USER}
+      DBPassword: ${USER_PG_DB_PASSWORD}
       JWTSecret: ${JWT_SECRET}
       JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME}
       JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME}
     depends_on:
-      auth-db-postgres:
+      user-db-postgres:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -81,17 +85,19 @@ services:
 
   user-db-postgres:
     image: postgres:16-alpine
-    container_name: user-db-db
+    container_name: user-db-postgres
     environment:
       POSTGRES_DB: ${USER_PG_DB_NAME}
-      POSTGRES_USER: ${AUTH_PG_DB_USER}
-      POSTGRES_PASSWORD: "db"
+      POSTGRES_USER: ${USER_PG_DB_USER}
+      POSTGRES_PASSWORD: ${USER_PG_DB_PASSWORD}
       PGSSLMODE: "disable"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${AUTH_PG_DB_USER}" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${USER_PG_DB_USER}" ]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}
+    ports:
+      - "5434:5432"
     restart: unless-stopped
     volumes:
       - user_db_data:/var/lib/postgresql/data
@@ -105,13 +111,8 @@ volumes:
 
 networks:
   shared-network:
-    name: shared-network
     driver: bridge
-
   auth-network:
-    name: auth-network
     driver: bridge
-
   user-network:
-    name: user-network
     driver: bridge

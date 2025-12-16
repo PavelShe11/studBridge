@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: account_service.proto
 
-package grpc
+package grpcService
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"

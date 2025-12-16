@@ -491,14 +491,14 @@ var file_account_service_proto_depIdxs = []int32{
 	9,  // 7: GetAccountResponse.AccountWrapper.userData:type_name -> GetAccountResponse.AccountWrapper.UserDataEntry
 	12, // 8: GetAccountResponse.AccountWrapper.UserDataEntry.value:type_name -> google.protobuf.Value
 	12, // 9: CreateAccountRequest.UserDataEntry.value:type_name -> google.protobuf.Value
-	5,  // 10: Service.createAccount:input_type -> CreateAccountRequest
-	2,  // 11: Service.getAccountByEmail:input_type -> GetAccountByEmailRequest
-	3,  // 12: Service.getAccountById:input_type -> GetAccountByIdRequest
-	0,  // 13: Service.validateAccountData:input_type -> ValidateAccountRequest
-	6,  // 14: Service.createAccount:output_type -> CreateAccountResponse
-	4,  // 15: Service.getAccountByEmail:output_type -> GetAccountResponse
-	4,  // 16: Service.getAccountById:output_type -> GetAccountResponse
-	1,  // 17: Service.validateAccountData:output_type -> ValidateAccountResponse
+	5,  // 10: AccountService.createAccount:input_type -> CreateAccountRequest
+	2,  // 11: AccountService.getAccountByEmail:input_type -> GetAccountByEmailRequest
+	3,  // 12: AccountService.getAccountById:input_type -> GetAccountByIdRequest
+	0,  // 13: AccountService.validateAccountData:input_type -> ValidateAccountRequest
+	6,  // 14: AccountService.createAccount:output_type -> CreateAccountResponse
+	4,  // 15: AccountService.getAccountByEmail:output_type -> GetAccountResponse
+	4,  // 16: AccountService.getAccountById:output_type -> GetAccountResponse
+	1,  // 17: AccountService.validateAccountData:output_type -> ValidateAccountResponse
 	14, // [14:18] is the sub-list for method output_type
 	10, // [10:14] is the sub-list for method input_type
 	10, // [10:10] is the sub-list for extension type_name

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "userMicro/internal/api/grpc";
+option go_package = "userMicro/internal/api/grpcService";
 
 import "google/protobuf/struct.proto";
 import "error.proto";

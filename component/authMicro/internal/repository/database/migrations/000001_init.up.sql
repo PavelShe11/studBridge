@@ -1,12 +1,10 @@
 CREATE TABLE registration_session
 (
-    id                                   UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
-    code                                 TEXT      NOT NULL,
-    email                                TEXT      NOT NULL UNIQUE,
-    code_expires                         TIMESTAMP NOT NULL,
-    is_accepted_privacy_policy           BOOLEAN   NOT NULL,
-    is_accepted_personal_data_processing BOOLEAN   NOT NULL,
-    created_at                           TIMESTAMP NOT NULL DEFAULT NOW()
+    id           UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
+    code         TEXT      NOT NULL,
+    email        TEXT      NOT NULL UNIQUE,
+    code_expires TIMESTAMP NOT NULL,
+    created_at   TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE login_session

@@ -17,7 +17,7 @@ func NewAccountRepository(db *sqlx.DB) *AccountRepository {
 }
 
 func (a *AccountRepository) CreateAccount(account domain.Account) error {
-	query := "INSERT INTO account (first_name, last_name, email) VALUES (?, ?, ?)"
+	query := "INSERT INTO account (first_name, last_name, email) VALUES (:first_name, :last_name, :email)"
 	_, err := a.db.NamedExec(query, account)
 	if err != nil {
 		return err
@@ -27,9 +27,9 @@ func (a *AccountRepository) CreateAccount(account domain.Account) error {
 
 func (a *AccountRepository) GetAccountByEmail(email string) (*domain.Account, error) {
 	account := domain.Account{}
-	query := "SELECT * FROM account WHERE email=?"
+	query := "SELECT * FROM account WHERE email=$1"
 	row := a.db.QueryRowx(query, email)
-	err := row.Scan(account)
+	err := row.StructScan(&account)
 	if err != nil {
 		return nil, err
 	}
@@ -39,9 +39,9 @@ func (a *AccountRepository) GetAccountByEmail(email string) (*domain.Account, er
 
 func (a *AccountRepository) GetAccountById(id string) (*domain.Account, error) {
 	account := domain.Account{}
-	query := "SELECT * FROM account WHERE id=?"
+	query := "SELECT * FROM account WHERE id=$1"
 	row := a.db.QueryRowx(query, id)
-	err := row.Scan(account)
+	err := row.StructScan(&account)
 	if err != nil {
 		return nil, err
 	}

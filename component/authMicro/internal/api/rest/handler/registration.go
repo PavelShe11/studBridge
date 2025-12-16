@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"authMicro/internal/service"
 	"authMicro/utlis/logger"
 
 	"net/http"
@@ -9,22 +10,29 @@ import (
 )
 
 type Register struct {
-	logger logger.Logger
+	logger              logger.Logger
+	registrationService service.RegistrationService
 }
 
-func NewRegisterHandler(logger logger.Logger) *Register {
+func NewRegisterHandler(logger logger.Logger, registrationService service.RegistrationService) *Register {
 	return &Register{
-		logger: logger,
+		logger:              logger,
+		registrationService: registrationService,
 	}
 }
 
 func (h *Register) SendRegistrationCode(c echo.Context) error {
-	var req map[string]interface{}
+	var req map[string]any
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, req)
+	answer, err := h.registrationService.Register(req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	return c.JSON(http.StatusOK, answer)
 }
 
 func (h *Register) RegistrationConfirmEmail(c echo.Context) error {
@@ -33,5 +41,10 @@ func (h *Register) RegistrationConfirmEmail(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	return c.JSON(http.StatusOK, req)
+	err := h.registrationService.ConfirmRegistration(req)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	return c.NoContent(http.StatusOK)
 }

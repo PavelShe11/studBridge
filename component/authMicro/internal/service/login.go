@@ -1,12 +1,12 @@
 package service
 
-import "authMicro/internal/api/grpc"
+import "authMicro/internal/api/grpcService"
 
 type LoginService struct {
-	accountService grpc.AccountServiceClient
+	accountService grpcService.AccountServiceClient
 }
 
-func NewLoginService(accountService grpc.AccountServiceClient) LoginService {
+func NewLoginService(accountService grpcService.AccountServiceClient) LoginService {
 	return LoginService{
 		accountService: accountService,
 	}

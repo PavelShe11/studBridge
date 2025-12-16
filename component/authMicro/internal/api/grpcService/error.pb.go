@@ -4,7 +4,7 @@
 // 	protoc        (unknown)
 // source: error.proto
 
-package grpc
+package grpcService
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
@@ -23,7 +23,7 @@ const (
 
 type Error struct {
 	state          protoimpl.MessageState `protogen:"open.v1"`
-	Error          string                 `protobuf:"bytes,1,opt,name=error,proto3" json:"error,omitempty"`
+	Name           string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
 	DetailedErrors []*Error_FieldError    `protobuf:"bytes,2,rep,name=detailedErrors,proto3" json:"detailedErrors,omitempty"`
 	unknownFields  protoimpl.UnknownFields
 	sizeCache      protoimpl.SizeCache
@@ -59,9 +59,9 @@ func (*Error) Descriptor() ([]byte, []int) {
 	return file_error_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Error) GetError() string {
+func (x *Error) GetName() string {
 	if x != nil {
-		return x.Error
+		return x.Name
 	}
 	return ""
 }
@@ -129,9 +129,9 @@ var File_error_proto protoreflect.FileDescriptor
 
 const file_error_proto_rawDesc = "" +
 	"\n" +
-	"\verror.proto\"\x94\x01\n" +
-	"\x05Error\x12\x14\n" +
-	"\x05error\x18\x01 \x01(\tR\x05error\x129\n" +
+	"\verror.proto\"\x92\x01\n" +
+	"\x05Error\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x129\n" +
 	"\x0edetailedErrors\x18\x02 \x03(\v2\x11.Error.FieldErrorR\x0edetailedErrors\x1a:\n" +
 	"\n" +
 	"FieldError\x12\x12\n" +

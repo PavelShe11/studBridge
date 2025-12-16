@@ -13,7 +13,7 @@ WORKDIR /app
 
 COPY --from=builder /app/auth-app .
 
-COPY --from=builder /app/internal/repository/db/migrations /migrations
+COPY --from=builder /app/internal/repository/database/migrations /migrations
 
 EXPOSE 8080
 

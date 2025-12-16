@@ -7,11 +7,18 @@ import (
 	"time"
 )
 
+type CodeGenConfig struct {
+	CodeTTL       time.Duration
+	CodePattern   string
+	CodeMaxLength int
+}
+
 type Config struct {
 	DB                     DBConfig
 	JWT                    JWTConfig
 	HttpServerAddr         string
 	AccountServiceGrpcAddr string
+	CodeGenConfig          CodeGenConfig
 }
 
 type HTTPConfig struct {
@@ -39,8 +46,8 @@ func NewConfig() (*Config, []error) {
 		DB: DBConfig{
 			Host:     getEnvIsRequiredWithErrors("DBHost", &errors),
 			Port:     getEnv("DBPort", "5432"),
-			Username: getEnv("DBUsername", "db"),
-			Password: getEnv("DBPassword", "db"),
+			Username: getEnv("DBUsername", "postgres"),
+			Password: getEnv("DBPassword", "postgres"),
 			DBName:   getEnvIsRequiredWithErrors("DBName", &errors),
 			SSLMode:  getEnv("DBSSLMode", "disable"),
 		},
@@ -51,6 +58,11 @@ func NewConfig() (*Config, []error) {
 		},
 		HttpServerAddr:         getEnv("HttpServerAddr", "0.0.0.0:80"),
 		AccountServiceGrpcAddr: getEnvIsRequiredWithErrors("AccountServiceGrpcAddr", &errors),
+		CodeGenConfig: CodeGenConfig{
+			CodeTTL:       time.Duration(getEnvAsInt("CodeTTL", 15)) * time.Minute,
+			CodePattern:   getEnv("CodePattern", "\\d{6}"),
+			CodeMaxLength: getEnvAsInt("CodeMaxLength", 6),
+		},
 	}, errors
 }
 
@@ -60,6 +72,19 @@ func getEnv(key, defaultValue string) string {
 		return defaultValue
 	}
 	return value
+}
+
+// getEnvAsInt читает переменную окружения как int с дефолтом при пустом значении или ошибке парсинга.
+func getEnvAsInt(key string, defaultValue int) int {
+	v := os.Getenv(key)
+	if v == "" {
+		return defaultValue
+	}
+	res, err := strconv.Atoi(v)
+	if err != nil {
+		return defaultValue
+	}
+	return res
 }
 
 func getEnvIsRequired(key string) (string, error) {

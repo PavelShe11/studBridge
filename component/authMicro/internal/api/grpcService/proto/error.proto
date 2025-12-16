@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-option go_package = "userMicro/internal/api/grpc";
+option go_package = "userMicro/internal/api/grpcService";
 
 message Error {
-  string error = 1;
+  string name = 1;
   repeated FieldError detailedErrors = 2;
 
   message FieldError {

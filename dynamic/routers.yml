@@ -2,7 +2,7 @@ http:
   routers:
     auth-service:
       rule: "PathPrefix(`/auth`)"
-      service: auth-accountGrpcService
+      service: auth-service
       entryPoints:
         - web
 

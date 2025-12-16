@@ -1,11 +1,12 @@
 package main
 
 import (
-	"authMicro/internal/api/grpc"
+	"authMicro/internal/api/grpcService"
 	"authMicro/internal/api/rest"
 	"authMicro/internal/api/rest/handler"
 	"authMicro/internal/config"
-	"authMicro/internal/repository/db"
+	"authMicro/internal/repository"
+	"authMicro/internal/repository/database"
 	"authMicro/internal/service"
 	"authMicro/utlis/logger"
 	"context"
@@ -15,8 +16,9 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	g "google.golang.org/grpc"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/alts"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 func main() {
@@ -29,7 +31,24 @@ func main() {
 		return
 	}
 
-	pg, err := db.NewPostgresDB(cfg.DB)
+	// grpcService
+	var transportOption grpc.DialOption
+	if os.Getenv("USE_ALTS") == "true" {
+		altsTC := alts.NewClientCreds(alts.DefaultClientOptions())
+		transportOption = grpc.WithTransportCredentials(altsTC)
+	} else {
+		transportOption = grpc.WithTransportCredentials(insecure.NewCredentials())
+	}
+
+	conn, err := grpc.NewClient(cfg.AccountServiceGrpcAddr, transportOption)
+	if err != nil {
+		l.Fatalf("Failed to initialize account accountGrpcService: %v", err)
+	}
+
+	accountServiceClient := grpcService.NewAccountServiceClient(conn)
+
+	// database
+	db, err := database.NewPostgresDB(cfg.DB)
 	if err != nil {
 		l.Fatalf("Failed to initialize database connection: %v", err)
 	}
@@ -38,25 +57,22 @@ func main() {
 		if err != nil {
 			l.Fatalf("Failed to close database connection: %v", err)
 		}
-	}(pg)
+	}(db)
 	l.Info("Database connection established")
 
-	if err := db.InitSchema(pg); err != nil {
+	if err := database.InitSchema(db); err != nil {
 		l.Fatalf("Failed to initialize database schema: %v", err)
 	}
 
-	altsTC := alts.NewClientCreds(alts.DefaultClientOptions())
-	conn, err := g.NewClient(cfg.AccountServiceGrpcAddr, g.WithTransportCredentials(altsTC))
-	if err != nil {
-		l.Fatalf("Failed to initialize account accountGrpcService: %v", err)
-	}
+	registrationSessionRepository := repository.NewRegistrationSessionRepository(db)
 
-	accountServiceClient := grpc.NewAccountServiceClient(conn)
-
+	// services
+	registrationService := service.NewRegistrationService(*registrationSessionRepository, accountServiceClient, l, &cfg.CodeGenConfig)
 	loginService := service.NewLoginService(accountServiceClient)
 
+	// REST server
 	router := rest.NewRouter(
-		handler.NewRegisterHandler(l),
+		handler.NewRegisterHandler(l, registrationService),
 		handler.NewLoginHandler(l, loginService),
 		handler.NewRefreshTokenHandler(l),
 	)
@@ -78,7 +94,7 @@ func main() {
 	defer cancel()
 
 	if err := router.Shutdown(ctx); err != nil {
-		l.Errorf("Error during server shutdown: %v", err)
+		l.Errorf("Name during server shutdown: %v", err)
 	}
 
 	l.Info("Server exited properly")

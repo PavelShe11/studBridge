@@ -10,12 +10,14 @@ import (
 )
 
 type Login struct {
-	logger logger.Logger
+	logger       logger.Logger
+	loginService service.LoginService
 }
 
-func NewLoginHandler(logger logger.Logger, service service.LoginService) *Login {
+func NewLoginHandler(logger logger.Logger, loginService service.LoginService) *Login {
 	return &Login{
-		logger: logger,
+		logger:       logger,
+		loginService: loginService,
 	}
 }
 

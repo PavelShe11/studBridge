@@ -21,11 +21,23 @@ func Register(server *grpc2.Server, accountService service.AccountService) {
 	})
 }
 
+func valueToString(m map[string]*structpb.Value, key string) string {
+	if m == nil {
+		return ""
+	}
+	v, ok := m[key]
+	if !ok || v == nil {
+		return ""
+	}
+	// use GetStringValue to be explicit
+	return v.GetStringValue()
+}
+
 func (a accountGrpcService) CreateAccount(_ context.Context, request *grpc.CreateAccountRequest) (*grpc.CreateAccountResponse, error) {
 	err := a.accountService.CreateAccount(domain.Account{
-		FirstName: request.UserData["firstName"].String(),
-		LastName:  request.UserData["lastName"].String(),
-		Email:     request.UserData["email"].String(),
+		FirstName: valueToString(request.UserData, "firstName"),
+		LastName:  valueToString(request.UserData, "lastName"),
+		Email:     valueToString(request.UserData, "email"),
 	})
 	return &grpc.CreateAccountResponse{
 		Error: mapToGrpcError(err),
@@ -57,6 +69,15 @@ func (a accountGrpcService) accountMapToGetAccountResponse(account *domain.Accou
 		}, nil
 	}
 
+	// account expected to be non-nil when err == nil
+	if account == nil {
+		return &grpc.GetAccountResponse{
+			Result: &grpc.GetAccountResponse_Error{
+				Error: &grpc.Error{Name: "internalError"},
+			},
+		}, nil
+	}
+
 	return &grpc.GetAccountResponse{
 		Result: &grpc.GetAccountResponse_Account{
 			Account: &grpc.GetAccountResponse_AccountWrapper{
@@ -72,9 +93,9 @@ func (a accountGrpcService) accountMapToGetAccountResponse(account *domain.Accou
 
 func (a accountGrpcService) ValidateAccountData(_ context.Context, request *grpc.ValidateAccountRequest) (*grpc.ValidateAccountResponse, error) {
 	err := a.accountService.ValidateAccountData(domain.Account{
-		FirstName: request.UserData["firstName"].String(),
-		LastName:  request.UserData["lastName"].String(),
-		Email:     request.UserData["email"].String(),
+		FirstName: valueToString(request.UserData, "firstName"),
+		LastName:  valueToString(request.UserData, "lastName"),
+		Email:     valueToString(request.UserData, "email"),
 	})
 	return &grpc.ValidateAccountResponse{
 		Error: mapToGrpcError(err),
@@ -82,6 +103,9 @@ func (a accountGrpcService) ValidateAccountData(_ context.Context, request *grpc
 }
 
 func mapToGrpcError(e *domain.Error) *grpc.Error {
+	if e == nil {
+		return nil
+	}
 	errs := make([]*grpc.Error_FieldError, 0)
 	for _, err := range e.FieldErrors {
 		errs = append(errs, &grpc.Error_FieldError{
@@ -90,7 +114,7 @@ func mapToGrpcError(e *domain.Error) *grpc.Error {
 		})
 	}
 	return &grpc.Error{
-		Error:          e.Error,
+		Name:           e.Name,
 		DetailedErrors: errs,
 	}
 }

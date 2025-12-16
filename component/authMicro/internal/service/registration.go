@@ -1,0 +1,210 @@
+package service
+
+import (
+	"authMicro/internal/api/grpcService"
+	"authMicro/internal/config"
+	"authMicro/internal/domain"
+	"authMicro/internal/repository"
+	"authMicro/utlis/converter"
+	"authMicro/utlis/generator"
+	"authMicro/utlis/logger"
+	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"time"
+
+	"google.golang.org/grpc/status"
+)
+
+type RegisterAnswer struct {
+	CodeExpires time.Time `json:"codeExpires"`
+	CodePattern string    `json:"codePattern"`
+}
+
+type RegistrationService struct {
+	registrationSessionRepository repository.RegistrationSessionRepository
+	accountServiceClient          grpcService.AccountServiceClient
+	logger                        logger.Logger
+	CodeGenConfig                 *config.CodeGenConfig
+}
+
+func NewRegistrationService(
+	registrationSessionRepository repository.RegistrationSessionRepository,
+	accountServiceClient grpcService.AccountServiceClient,
+	logger logger.Logger,
+	codeGenConfig *config.CodeGenConfig,
+) RegistrationService {
+	return RegistrationService{
+		registrationSessionRepository: registrationSessionRepository,
+		accountServiceClient:          accountServiceClient,
+		logger:                        logger,
+		CodeGenConfig:                 codeGenConfig,
+	}
+}
+
+func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer, *domain.Error) {
+	grpcMap, err := converter.ConvertToGrpcMap(userData)
+	if err != nil {
+		r.logger.Error(err)
+		return nil, &domain.Error{Name: "internalError"}
+	}
+
+	// ValidateAccountData with timeout and enhanced logging
+	ctxV, cancelV := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelV()
+	validationResponse, err := r.accountServiceClient.ValidateAccountData(
+		ctxV,
+		&grpcService.ValidateAccountRequest{UserData: grpcMap},
+	)
+	if err != nil {
+		st, _ := status.FromError(err)
+		r.logger.Error(fmt.Errorf("ValidateAccountData error: %v, grpc status: %v", err, st))
+		return nil, &domain.Error{Name: "internalError"}
+	}
+	if validationResponse.Error != nil {
+		return nil, domain.GrpcErrorMapToError(validationResponse.Error)
+	}
+
+	email, ok := userData["email"].(string)
+	if !ok {
+		r.logger.Error(errors.New("email not found in response"))
+		return nil, &domain.Error{Name: "internalError"}
+	}
+
+	// GetAccountByEmail with timeout and enhanced logging
+	ctxG, cancelG := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelG()
+	getAccountResponse, err := r.accountServiceClient.GetAccountByEmail(
+		ctxG,
+		&grpcService.GetAccountByEmailRequest{Email: email},
+	)
+	if err != nil {
+		st, _ := status.FromError(err)
+		r.logger.Error(fmt.Errorf("GetAccountByEmail error: %v, grpc status: %v", err, st))
+		return nil, &domain.Error{Name: "internalError"}
+	}
+	var session *domain.RegistrationSession
+
+	if account, ok := getAccountResponse.Result.(*grpcService.GetAccountResponse_Account); ok && account != nil {
+		session, err = r.createOrUpdateSession(email, "")
+		if err != nil {
+			r.logger.Error(err)
+			return nil, &domain.Error{Name: "internalError"}
+		}
+	} else {
+		code, err := generator.Reggen(r.CodeGenConfig.CodePattern, r.CodeGenConfig.CodeMaxLength)
+		if err != nil {
+			r.logger.Error(err)
+			return nil, &domain.Error{Name: "internalError"}
+		}
+		session, err = r.createOrUpdateSession(email, code)
+		if err != nil {
+			r.logger.Error(err)
+			return nil, &domain.Error{Name: "internalError"}
+		}
+	}
+
+	r.logger.Info(session)
+
+	return &RegisterAnswer{
+		CodeExpires: session.CodeExpires,
+		CodePattern: r.CodeGenConfig.CodePattern,
+	}, nil
+}
+
+func (r *RegistrationService) createOrUpdateSession(email string, newCode string) (*domain.RegistrationSession, error) {
+	session, err := r.registrationSessionRepository.FindByEmail(email)
+	if errors.Is(err, sql.ErrNoRows) {
+		session = &domain.RegistrationSession{
+			Code:        newCode,
+			Email:       email,
+			CodeExpires: time.Now().Add(r.CodeGenConfig.CodeTTL),
+			CreateAt:    time.Now(),
+		}
+	} else if err != nil {
+		r.logger.Error(err)
+		return nil, err
+	} else if session.CodeExpires.Before(time.Now()) {
+		session.Code = newCode
+		session.CodeExpires = time.Now().Add(r.CodeGenConfig.CodeTTL)
+	}
+
+	if err := r.registrationSessionRepository.Save(session); err != nil {
+		r.logger.Error(err)
+		return nil, err
+	}
+
+	return session, nil
+}
+
+func (r *RegistrationService) ConfirmRegistration(userData map[string]any) *domain.Error {
+	grpcMap, err := converter.ConvertToGrpcMap(userData)
+	if err != nil {
+		r.logger.Error(err)
+		return &domain.Error{Name: "internalError8"}
+	}
+
+	ctxV, cancelV := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelV()
+	validationResponse, err := r.accountServiceClient.ValidateAccountData(
+		ctxV,
+		&grpcService.ValidateAccountRequest{UserData: grpcMap},
+	)
+	if err != nil {
+		st, _ := status.FromError(err)
+		r.logger.Error(fmt.Errorf("ValidateAccountData error: %v, grpc status: %v", err, st))
+		return &domain.Error{Name: "internalError9"}
+	}
+	if validationResponse.Error != nil {
+		return domain.GrpcErrorMapToError(validationResponse.Error)
+	}
+
+	email, ok := userData["email"].(string)
+	if !ok {
+		r.logger.Error(errors.New("email not found in userData"))
+		return &domain.Error{Name: "internalError10"}
+	}
+
+	session, err := r.registrationSessionRepository.FindByEmail(email)
+	if err != nil {
+		r.logger.Error(err)
+		return &domain.Error{Name: "internalError11"}
+	}
+	if session.CodeExpires.Before(time.Now()) {
+		return &domain.Error{
+			Name: "codeExpired",
+			FieldErrors: []domain.FieldError{
+				{Name: "code", Message: "codeExpired"},
+			},
+		}
+	}
+	if code, ok := userData["code"].(string); ok && code != session.Code {
+		return &domain.Error{
+			Name: "invalidCode",
+			FieldErrors: []domain.FieldError{
+				{Name: "code", Message: "invalidCode"},
+			},
+		}
+	}
+
+	ctxC, cancelC := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancelC()
+	createAccountResponse, err := r.accountServiceClient.CreateAccount(
+		ctxC,
+		&grpcService.CreateAccountRequest{UserData: grpcMap},
+	)
+
+	if err != nil {
+		st, _ := status.FromError(err)
+		r.logger.Error(fmt.Errorf("CreateAccount error: %v, grpc status: %v", err, st))
+		return &domain.Error{Name: "internalError12"}
+	}
+
+	if createAccountResponse.Error != nil {
+		return domain.GrpcErrorMapToError(createAccountResponse.Error)
+	}
+
+	r.logger.Info("Account successfully created for email=" + email)
+	return nil
+}

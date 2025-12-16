@@ -1,10 +1,10 @@
-package db
+package database
 
 import (
-	"authMicro/internal/config"
 	"errors"
 	"fmt"
 	"time"
+	"userMicro/internal/config"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
