@@ -14,6 +14,8 @@ import (
 	"fmt"
 	"time"
 
+	"google.golang.org/protobuf/types/known/structpb"
+
 	"google.golang.org/grpc/status"
 )
 
@@ -43,7 +45,7 @@ func NewRegistrationService(
 	}
 }
 
-func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer, *domain.Error) {
+func (r *RegistrationService) validateRegistrationData(userData map[string]any) (map[string]*structpb.Value, *domain.Error) {
 	grpcMap, err := converter.ConvertToGrpcMap(userData)
 	if err != nil {
 		r.logger.Error(err)
@@ -65,12 +67,10 @@ func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer
 		return nil, domain.GrpcErrorMapToError(validationResponse.Error)
 	}
 
-	email, ok := userData["email"].(string)
-	if !ok {
-		r.logger.Error(errors.New("email not found in response"))
-		return nil, &domain.Error{Name: "internalError"}
-	}
+	return grpcMap, nil
+}
 
+func (r *RegistrationService) getAccountByEmail(email string) (*grpcService.GetAccountResponse, *domain.Error) {
 	ctxG, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	accountGrpc, err := r.accountServiceClient.GetAccountByEmail(
@@ -83,8 +83,27 @@ func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer
 		r.logger.Error(fmt.Errorf("GetAccountByEmail error: %v, grpc status: %v", err, st))
 		return nil, &domain.Error{Name: "internalError"}
 	}
+	return accountGrpc, nil
+}
+
+func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer, *domain.Error) {
+	if _, domainErr := r.validateRegistrationData(userData); domainErr != nil {
+		return nil, domainErr
+	}
+
+	email, ok := userData["email"].(string)
+	if !ok {
+		r.logger.Error(errors.New("email not found in response"))
+		return nil, &domain.Error{Name: "internalError"}
+	}
+
+	accountGrpc, domainErr := r.getAccountByEmail(email)
+	if domainErr != nil {
+		return nil, domainErr
+	}
 
 	var session *domain.RegistrationSession
+	var err error
 
 	if account, ok := accountGrpc.Result.(*grpcService.GetAccountResponse_Account); ok && account != nil {
 		session, err = r.createOrUpdateSession(email, "")
@@ -93,7 +112,8 @@ func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer
 			return nil, &domain.Error{Name: "internalError"}
 		}
 	} else {
-		code, err := generator.Reggen(r.CodeGenConfig.CodePattern, r.CodeGenConfig.CodeMaxLength)
+		var code string
+		code, err = generator.Reggen(r.CodeGenConfig.CodePattern, r.CodeGenConfig.CodeMaxLength)
 		if err != nil {
 			r.logger.Error(err)
 			return nil, &domain.Error{Name: "internalError"}
@@ -138,34 +158,7 @@ func (r *RegistrationService) createOrUpdateSession(email string, newCode string
 	return session, nil
 }
 
-func (r *RegistrationService) ConfirmRegistration(userData map[string]any) *domain.Error {
-	grpcMap, err := converter.ConvertToGrpcMap(userData)
-	if err != nil {
-		r.logger.Error(err)
-		return &domain.Error{Name: "internalError"}
-	}
-
-	ctxV, cancelV := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelV()
-	validationResponse, err := r.accountServiceClient.ValidateAccountData(
-		ctxV,
-		&grpcService.ValidateAccountRequest{UserData: grpcMap},
-	)
-	if err != nil {
-		st, _ := status.FromError(err)
-		r.logger.Error(fmt.Errorf("ValidateAccountData error: %v, grpc status: %v", err, st))
-		return &domain.Error{Name: "internalError"}
-	}
-	if validationResponse.Error != nil {
-		return domain.GrpcErrorMapToError(validationResponse.Error)
-	}
-
-	email, ok := userData["email"].(string)
-	if !ok {
-		r.logger.Error(errors.New("email not found in userData"))
-		return &domain.Error{Name: "internalError"}
-	}
-
+func (r *RegistrationService) validateConfirmationCode(email string, userData map[string]any) *domain.Error {
 	session, err := r.registrationSessionRepository.FindByEmail(email)
 	if err != nil {
 		r.logger.Error(err)
@@ -186,6 +179,24 @@ func (r *RegistrationService) ConfirmRegistration(userData map[string]any) *doma
 				{Name: "code", Message: "invalidCode"},
 			},
 		}
+	}
+	return nil
+}
+
+func (r *RegistrationService) ConfirmRegistration(userData map[string]any) *domain.Error {
+	grpcMap, domainErr := r.validateRegistrationData(userData)
+	if domainErr != nil {
+		return domainErr
+	}
+
+	email, ok := userData["email"].(string)
+	if !ok {
+		r.logger.Error(errors.New("email not found in userData"))
+		return &domain.Error{Name: "internalError"}
+	}
+
+	if err := r.validateConfirmationCode(email, userData); err != nil {
+		return err
 	}
 
 	ctxC, cancelC := context.WithTimeout(context.Background(), 5*time.Second)
