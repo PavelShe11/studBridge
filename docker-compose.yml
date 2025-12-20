@@ -26,12 +26,12 @@ services:
     container_name: auth-service
     environment:
       DBHost: auth-db-postgres
-      DBName: ${AUTH_PG_DB_NAME}
-      DBUsername: ${AUTH_PG_DB_USER}
-      DBPassword: ${AUTH_PG_DB_PASSWORD}
+      DBName: ${AUTH_PG_DB_NAME:-auth-micro-db}
+      DBUsername: ${AUTH_PG_DB_USER:-postgres}
+      DBPassword: ${AUTH_PG_DB_PASSWORD:-postgres}
       JWTSecret: ${JWT_SECRET}
-      JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME}
-      JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME}
+      JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME:-86400000}
+      JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME:-432000000}
       AccountServiceGrpcAddr: "dns:///user-service:9092"
     depends_on:
       auth-db-postgres:
@@ -45,15 +45,15 @@ services:
     image: postgres:16-alpine
     container_name: auth-db-postgres
     environment:
-      POSTGRES_DB: ${AUTH_PG_DB_NAME}
-      POSTGRES_USER: ${AUTH_PG_DB_USER}
-      POSTGRES_PASSWORD: ${AUTH_PG_DB_PASSWORD}
-      PGSSLMODE: "disable"
+      POSTGRES_DB: ${AUTH_PG_DB_NAME:-auth-micro-db}
+      POSTGRES_USER: ${AUTH_PG_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${AUTH_PG_DB_PASSWORD:-postgres}
+      PGSSLMODE: ${AUTH_PG_SSLMODE_STATUS:-disable}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${AUTH_PG_DB_USER}" ]
-      interval: ${HEALTHCHECK_INTERVAL}
-      timeout: ${HEALTHCHECK_TIMEOUT}
-      retries: ${HEALTHCHECK_RETRIES}
+      test: [ "CMD-SHELL", "pg_isready -U ${AUTH_PG_DB_USER:-postgres}" ]
+      interval: ${HEALTHCHECK_INTERVAL:-1s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${HEALTHCHECK_RETRIES:-10}
     ports:
       - "5433:5432"
     restart: unless-stopped
@@ -71,12 +71,12 @@ services:
     container_name: user-service
     environment:
       DBHost: user-db-postgres
-      DBName: ${USER_PG_DB_NAME}
-      DBUsername: ${USER_PG_DB_USER}
-      DBPassword: ${USER_PG_DB_PASSWORD}
+      DBName: ${USER_PG_DB_NAME:-user-micro-db}
+      DBUsername: ${USER_PG_DB_USER:-postgres}
+      DBPassword: ${USER_PG_DB_PASSWORD:-postgres}
       JWTSecret: ${JWT_SECRET}
-      JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME}
-      JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME}
+      JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME:-86400000}
+      JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME:-432000000}
     depends_on:
       user-db-postgres:
         condition: service_healthy
@@ -89,15 +89,15 @@ services:
     image: postgres:16-alpine
     container_name: user-db-postgres
     environment:
-      POSTGRES_DB: ${USER_PG_DB_NAME}
-      POSTGRES_USER: ${USER_PG_DB_USER}
-      POSTGRES_PASSWORD: ${USER_PG_DB_PASSWORD}
-      PGSSLMODE: "disable"
+      POSTGRES_DB: ${USER_PG_DB_NAME:-user-micro-db}
+      POSTGRES_USER: ${USER_PG_DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${USER_PG_DB_PASSWORD:-postgres}
+      PGSSLMODE: ${USER_PG_SSLMODE_STATUS:-disable}
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${USER_PG_DB_USER}" ]
-      interval: ${HEALTHCHECK_INTERVAL}
-      timeout: ${HEALTHCHECK_TIMEOUT}
-      retries: ${HEALTHCHECK_RETRIES}
+      test: [ "CMD-SHELL", "pg_isready -U ${USER_PG_DB_USER:-postgres}" ]
+      interval: ${HEALTHCHECK_INTERVAL:-1s}
+      timeout: ${HEALTHCHECK_TIMEOUT:-5s}
+      retries: ${HEALTHCHECK_RETRIES:-10}
     ports:
       - "5434:5432"
     restart: unless-stopped

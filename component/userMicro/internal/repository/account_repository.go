@@ -33,7 +33,6 @@ func (a *AccountRepository) GetAccountByEmail(email string) (*domain.Account, er
 	if err != nil {
 		return nil, err
 	}
-
 	return &account, nil
 }
 
@@ -45,6 +44,5 @@ func (a *AccountRepository) GetAccountById(id string) (*domain.Account, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return &account, nil
 }
