@@ -8,6 +8,7 @@ import (
 	"authMicro/internal/repository"
 	"authMicro/internal/repository/database"
 	"authMicro/internal/service"
+	"authMicro/utlis/interceptor"
 	"authMicro/utlis/logger"
 	"context"
 	"os"
@@ -40,7 +41,14 @@ func main() {
 		transportOption = grpc.WithTransportCredentials(insecure.NewCredentials())
 	}
 
-	conn, err := grpc.NewClient(cfg.AccountServiceGrpcAddr, transportOption)
+	// Create internal auth interceptor for microservice-to-microservice authentication
+	authInterceptor := interceptor.UnaryClientInternalAuthInterceptor(cfg.AccountServiceGrpc.InternalAPIKey, l)
+
+	conn, err := grpc.NewClient(
+		cfg.AccountServiceGrpc.Addr,
+		transportOption,
+		grpc.WithUnaryInterceptor(authInterceptor),
+	)
 	if err != nil {
 		l.Fatalf("Failed to initialize account accountGrpcService: %v", err)
 	}

@@ -71,20 +71,22 @@ func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer
 		return nil, &domain.Error{Name: "internalError"}
 	}
 
-	ctxG, cancelG := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancelG()
-	getAccountResponse, err := r.accountServiceClient.GetAccountByEmail(
+	ctxG, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	accountGrpc, err := r.accountServiceClient.GetAccountByEmail(
 		ctxG,
 		&grpcService.GetAccountByEmailRequest{Email: email},
 	)
+
 	if err != nil {
 		st, _ := status.FromError(err)
 		r.logger.Error(fmt.Errorf("GetAccountByEmail error: %v, grpc status: %v", err, st))
 		return nil, &domain.Error{Name: "internalError"}
 	}
+
 	var session *domain.RegistrationSession
 
-	if account, ok := getAccountResponse.Result.(*grpcService.GetAccountResponse_Account); ok && account != nil {
+	if account, ok := accountGrpc.Result.(*grpcService.GetAccountResponse_Account); ok && account != nil {
 		session, err = r.createOrUpdateSession(email, "")
 		if err != nil {
 			r.logger.Error(err)
@@ -177,7 +179,7 @@ func (r *RegistrationService) ConfirmRegistration(userData map[string]any) *doma
 			},
 		}
 	}
-	if code, ok := userData["code"].(string); ok && code != session.Code {
+	if code, ok := userData["code"].(string); (ok && code != session.Code) || code == "" {
 		return &domain.Error{
 			Name: "invalidCode",
 			FieldErrors: []domain.FieldError{

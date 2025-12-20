@@ -33,6 +33,7 @@ services:
       JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME:-86400000}
       JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME:-432000000}
       AccountServiceGrpcAddr: "dns:///user-service:9092"
+      InternalAPIKey: ${INTERNAL_API_KEY}
     depends_on:
       auth-db-postgres:
         condition: service_healthy
@@ -77,6 +78,7 @@ services:
       JWTSecret: ${JWT_SECRET}
       JWTAccessTokenExpiration: ${ACCESS_TOKEN_LIFETIME:-86400000}
       JWTRefreshTokenExpiration: ${REFRESH_TOKEN_LIFETIME:-432000000}
+      InternalAPIKey: ${INTERNAL_API_KEY}
     depends_on:
       user-db-postgres:
         condition: service_healthy

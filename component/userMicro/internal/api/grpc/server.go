@@ -3,6 +3,7 @@ package grpc
 import (
 	"net"
 	"userMicro/internal/config"
+	"userMicro/utlis/interceptor"
 	"userMicro/utlis/logger"
 
 	"google.golang.org/grpc"
@@ -16,9 +17,17 @@ type Service struct {
 }
 
 func NewGRPCServer(config config.GRPCConfig, logger logger.Logger) *Service {
+	// Create internal auth interceptor for microservice-to-microservice authentication
+	authInterceptor := interceptor.UnaryServerInternalAuthInterceptor(config.InternalAPIKey, logger)
+
+	// Create server with interceptor
+	server := grpc.NewServer(
+		grpc.UnaryInterceptor(authInterceptor),
+	)
+
 	return &Service{
 		address: config.ServerAddr,
-		Server:  grpc.NewServer(),
+		Server:  server,
 		logger:  logger,
 	}
 }

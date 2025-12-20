@@ -15,7 +15,8 @@ type Config struct {
 }
 
 type GRPCConfig struct {
-	ServerAddr string
+	ServerAddr     string
+	InternalAPIKey string
 }
 
 type HTTPConfig struct {
@@ -41,7 +42,8 @@ func NewConfig() (*Config, []error) {
 	errors := make([]error, 0)
 	return &Config{
 		Grpc: GRPCConfig{
-			ServerAddr: getEnv("GrpcServerAddr", "0.0.0.0:9092"),
+			ServerAddr:     getEnv("GrpcServerAddr", "0.0.0.0:9092"),
+			InternalAPIKey: getEnvIsRequiredWithErrors("InternalAPIKey", &errors),
 		},
 		Http: HTTPConfig{
 			ServerAddr: getEnv("HttpServerAddr", "0.0.0.0:80"),

@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+	"errors"
 	"userMicro/internal/domain"
 
 	"github.com/jmoiron/sqlx"
@@ -30,6 +32,9 @@ func (a *AccountRepository) GetAccountByEmail(email string) (*domain.Account, er
 	query := "SELECT * FROM account WHERE email=$1"
 	row := a.db.QueryRowx(query, email)
 	err := row.StructScan(&account)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}

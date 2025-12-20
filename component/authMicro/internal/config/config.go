@@ -13,12 +13,17 @@ type CodeGenConfig struct {
 	CodeMaxLength int
 }
 
+type AccountServiceGrpcConfig struct {
+	Addr           string
+	InternalAPIKey string
+}
+
 type Config struct {
-	DB                     DBConfig
-	JWT                    JWTConfig
-	HttpServerAddr         string
-	AccountServiceGrpcAddr string
-	CodeGenConfig          CodeGenConfig
+	DB                 DBConfig
+	JWT                JWTConfig
+	HttpServerAddr     string
+	AccountServiceGrpc AccountServiceGrpcConfig
+	CodeGenConfig      CodeGenConfig
 }
 
 type HTTPConfig struct {
@@ -56,8 +61,11 @@ func NewConfig() (*Config, []error) {
 			RefreshTokenExpiration: time.Duration(getEnvIsRequiredWithErrorsAsInt("JWTRefreshTokenExpiration", &errors)) * time.Millisecond,
 			Secret:                 getEnvIsRequiredWithErrors("JWTSecret", &errors),
 		},
-		HttpServerAddr:         getEnv("HttpServerAddr", "0.0.0.0:80"),
-		AccountServiceGrpcAddr: getEnvIsRequiredWithErrors("AccountServiceGrpcAddr", &errors),
+		HttpServerAddr: getEnv("HttpServerAddr", "0.0.0.0:80"),
+		AccountServiceGrpc: AccountServiceGrpcConfig{
+			Addr:           getEnvIsRequiredWithErrors("AccountServiceGrpcAddr", &errors),
+			InternalAPIKey: getEnvIsRequiredWithErrors("InternalAPIKey", &errors),
+		},
 		CodeGenConfig: CodeGenConfig{
 			CodeTTL:       time.Duration(getEnvAsInt("CodeTTL", 15)) * time.Minute,
 			CodePattern:   getEnv("CodePattern", "\\d{6}"),
