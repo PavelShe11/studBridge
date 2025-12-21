@@ -3,6 +3,8 @@ package repository
 import (
 	"authMicro/internal/domain"
 	"context"
+	"database/sql"
+	"errors"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -22,6 +24,9 @@ func (r RegistrationSessionRepository) FindByEmail(email string) (*domain.Regist
 	result := &domain.RegistrationSession{}
 	row := r.db.QueryRowx(query, email)
 	err := row.StructScan(result)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, err
 	}

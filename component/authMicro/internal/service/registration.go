@@ -9,7 +9,6 @@ import (
 	"authMicro/utlis/generator"
 	"authMicro/utlis/logger"
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
 	"time"
@@ -151,7 +150,7 @@ func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer
 
 func (r *RegistrationService) createOrUpdateSession(email string, newCode string) (*domain.RegistrationSession, error) {
 	session, err := r.registrationSessionRepository.FindByEmail(email)
-	if errors.Is(err, sql.ErrNoRows) {
+	if session == nil && err == nil {
 		session = &domain.RegistrationSession{
 			Code:        newCode,
 			Email:       email,
@@ -179,6 +178,14 @@ func (r *RegistrationService) validateConfirmationCode(email string, userData ma
 	if err != nil {
 		r.logger.Error(err)
 		return &domain.Error{Name: "internalError"}
+	}
+	if session == nil {
+		return &domain.Error{
+			Name: "invalidCode",
+			FieldErrors: []domain.FieldError{
+				{Name: "code", Message: "invalidCode"},
+			},
+		}
 	}
 	if session.CodeExpires.Before(time.Now()) {
 		return &domain.Error{
