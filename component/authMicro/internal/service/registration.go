@@ -20,13 +20,14 @@ import (
 )
 
 /*
-TODO: 1. Добавить хэширвоание кодов
-TODO: 2. Изменить формат даты на timestamp (Long)
+TODO: Добавить хэширвоание кодов
+TODO: Изменить отображение ошибки сейчас поля, к которым относится ошибка носят названия как в структуре а нужно чтобы как в body запроса
+TODO: Подумать о добавлении транзакций
 */
 
 type RegisterAnswer struct {
-	CodeExpires time.Time `json:"codeExpires"`
-	CodePattern string    `json:"codePattern"`
+	CodeExpires int64  `json:"codeExpires"`
+	CodePattern string `json:"codePattern"`
 }
 
 type RegistrationService struct {
@@ -143,7 +144,7 @@ func (r *RegistrationService) Register(userData map[string]any) (*RegisterAnswer
 	r.logger.Debug(session)
 
 	return &RegisterAnswer{
-		CodeExpires: session.CodeExpires,
+		CodeExpires: session.CodeExpires.Unix(),
 		CodePattern: r.CodeGenConfig.CodePattern,
 	}, nil
 }
