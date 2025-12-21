@@ -2,13 +2,35 @@ package validation
 
 import (
 	"errors"
+	"reflect"
+	"strings"
 	"userMicro/internal/domain"
 
 	"github.com/go-playground/validator/v10"
 )
 
+// Singleton validator instance configured to use JSON field names
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New()
+
+	// Configure validator to use JSON tag names instead of struct field names
+	validate.RegisterTagNameFunc(func(fld reflect.StructField) string {
+		// Extract the JSON tag (handle format: "json:\"fieldName,omitempty\"")
+		name := strings.SplitN(fld.Tag.Get("json"), ",", 2)[0]
+
+		// Fallback to struct field name if JSON tag is empty or "-"
+		if name == "" || name == "-" {
+			return fld.Name
+		}
+
+		return name
+	})
+}
+
 func Var(nameField string, field interface{}, tag string, error *domain.Error) {
-	err := validator.New().Var(field, tag)
+	err := validate.Var(field, tag)
 	if err == nil {
 		return
 	}
@@ -28,7 +50,7 @@ func Var(nameField string, field interface{}, tag string, error *domain.Error) {
 
 func Struct(s interface{}) []domain.FieldError {
 	result := make([]domain.FieldError, 0)
-	err := validator.New().Struct(s)
+	err := validate.Struct(s)
 	if err == nil {
 		return nil
 	}

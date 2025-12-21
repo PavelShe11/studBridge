@@ -8,6 +8,10 @@ import (
 	"userMicro/utlis/validation"
 )
 
+/**
+TODO: Добавить перевод ошибок
+*/
+
 type AccountService struct {
 	accountRepository *repository.AccountRepository
 	logger            logger.Logger
