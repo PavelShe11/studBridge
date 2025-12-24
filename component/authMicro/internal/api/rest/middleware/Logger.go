@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"authMicro/utlis/logger"
 	"bytes"
 	"encoding/json"
+	"github.com/PavelShe11/studbridge/common/logger"
 	"strings"
 
 	"github.com/labstack/echo/v4"

@@ -2,10 +2,11 @@ package accountGrpcService
 
 import (
 	"context"
-	"userMicro/internal/api/grpc"
-	"userMicro/internal/domain"
-	"userMicro/internal/service"
-	"userMicro/utlis/translator"
+	commondomain "github.com/PavelShe11/studbridge/common/domain"
+	"github.com/PavelShe11/studbridge/common/translator"
+	"github.com/PavelShe11/studbridge/user/internal/api/grpc"
+	"github.com/PavelShe11/studbridge/user/internal/domain"
+	"github.com/PavelShe11/studbridge/user/internal/service"
 
 	grpc2 "google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -71,7 +72,7 @@ func (a accountGrpcService) GetAccountById(_ context.Context, request *grpc.GetA
 	)
 }
 
-func (a accountGrpcService) accountMapToGetAccountResponse(account *domain.Account, err *domain.Error) (*grpc.GetAccountResponse, error) {
+func (a accountGrpcService) accountMapToGetAccountResponse(account *domain.Account, err error) (*grpc.GetAccountResponse, error) {
 	if err != nil {
 		return &grpc.GetAccountResponse{
 			Result: &grpc.GetAccountResponse_Error{
@@ -120,19 +121,38 @@ func (a accountGrpcService) ValidateAccountData(ctx context.Context, request *gr
 	}, nil
 }
 
-func mapToGrpcError(e *domain.Error) *grpc.Error {
+func mapToGrpcError(e error) *grpc.Error {
 	if e == nil {
 		return nil
 	}
+
 	errs := make([]*grpc.Error_FieldError, 0)
-	for _, err := range e.FieldErrors {
-		errs = append(errs, &grpc.Error_FieldError{
-			Name:    err.Name,
-			Message: err.Message,
-		})
+
+	// Try to type assert to BaseValidationError first (has field errors)
+	if validErr, ok := e.(*commondomain.BaseValidationError); ok {
+		for _, err := range validErr.FieldErrors {
+			errs = append(errs, &grpc.Error_FieldError{
+				Name:    err.NameField,
+				Message: err.Message,
+			})
+		}
+		return &grpc.Error{
+			Name:           validErr.Name,
+			DetailedErrors: errs,
+		}
 	}
+
+	// Try to type assert to BaseError (no field errors)
+	if baseErr, ok := e.(*commondomain.BaseError); ok {
+		return &grpc.Error{
+			Name:           baseErr.Name,
+			DetailedErrors: errs,
+		}
+	}
+
+	// Fallback for any other error
 	return &grpc.Error{
-		Name:           e.Name,
+		Name:           e.Error(),
 		DetailedErrors: errs,
 	}
 }

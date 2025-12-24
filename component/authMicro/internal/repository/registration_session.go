@@ -1,10 +1,10 @@
 package repository
 
 import (
-	"authMicro/internal/domain"
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/PavelShe11/studbridge/auth/internal/domain"
 
 	"github.com/jmoiron/sqlx"
 )

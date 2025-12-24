@@ -1,8 +1,8 @@
 package handler
 
 import (
-	"authMicro/internal/service"
-	"authMicro/utlis/logger"
+	"github.com/PavelShe11/studbridge/auth/internal/service"
+	"github.com/PavelShe11/studbridge/common/logger"
 
 	"net/http"
 

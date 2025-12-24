@@ -1,17 +1,8 @@
-[invalidCode]
-other = "Неверный код"
-
-[codeExpired]
-other = "Срок действия кода истек"
-
 [internalError]
 other = "Внутренняя ошибка сервера"
 
 [validationError]
 other = "Ошибка валидации"
-
-[internalServerError]
-other = "Внутренняя ошибка сервера"
 
 # Простые validation теги
 [required]

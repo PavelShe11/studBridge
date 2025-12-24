@@ -1,18 +1,18 @@
 package main
 
 import (
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/common/translator"
+	"github.com/PavelShe11/studbridge/user/internal/api/grpc"
+	"github.com/PavelShe11/studbridge/user/internal/api/grpc/accountGrpcService"
+	"github.com/PavelShe11/studbridge/user/internal/config"
+	"github.com/PavelShe11/studbridge/user/internal/repository"
+	"github.com/PavelShe11/studbridge/user/internal/repository/database"
+	"github.com/PavelShe11/studbridge/user/internal/service"
+	"github.com/PavelShe11/studbridge/user/utlis/validation"
 	"os"
 	"os/signal"
 	"syscall"
-	"userMicro/internal/api/grpc"
-	"userMicro/internal/api/grpc/accountGrpcService"
-	"userMicro/internal/config"
-	"userMicro/internal/repository"
-	"userMicro/internal/repository/database"
-	"userMicro/internal/service"
-	"userMicro/utlis/logger"
-	"userMicro/utlis/translator"
-	"userMicro/utlis/validation"
 
 	"github.com/jmoiron/sqlx"
 )

@@ -1,9 +1,9 @@
 package database
 
 import (
-	"authMicro/internal/config"
 	"errors"
 	"fmt"
+	"github.com/PavelShe11/studbridge/auth/internal/config"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"

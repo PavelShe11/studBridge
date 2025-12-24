@@ -1,10 +1,10 @@
 package grpc
 
 import (
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/user/internal/config"
+	"github.com/PavelShe11/studbridge/user/utlis/interceptor"
 	"net"
-	"userMicro/internal/config"
-	"userMicro/utlis/interceptor"
-	"userMicro/utlis/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"

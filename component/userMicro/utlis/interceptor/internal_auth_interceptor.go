@@ -2,7 +2,7 @@ package interceptor
 
 import (
 	"context"
-	"userMicro/utlis/logger"
+	"github.com/PavelShe11/studbridge/common/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

@@ -1,16 +1,17 @@
 package service
 
 import (
-	"authMicro/internal/api/grpcService"
-	"authMicro/internal/config"
-	"authMicro/internal/domain"
-	"authMicro/internal/repository"
-	"authMicro/utlis/converter"
-	"authMicro/utlis/generator"
-	"authMicro/utlis/logger"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/PavelShe11/studbridge/auth/internal/api/grpcService"
+	"github.com/PavelShe11/studbridge/auth/internal/config"
+	"github.com/PavelShe11/studbridge/auth/internal/domain"
+	"github.com/PavelShe11/studbridge/auth/internal/repository"
+	"github.com/PavelShe11/studbridge/auth/utlis/converter"
+	"github.com/PavelShe11/studbridge/auth/utlis/generator"
+	commondomain "github.com/PavelShe11/studbridge/common/domain"
+	"github.com/PavelShe11/studbridge/common/logger"
 	"time"
 
 	"google.golang.org/grpc/metadata"
@@ -50,7 +51,7 @@ func (r *RegistrationService) validateRegistrationData(userData map[string]any, 
 	grpcMap, err := converter.ConvertToGrpcMap(userData)
 	if err != nil {
 		r.logger.Error(err)
-		return nil, &domain.Error{Name: "internalError"}
+		return nil, err
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -67,7 +68,7 @@ func (r *RegistrationService) validateRegistrationData(userData map[string]any, 
 	if err != nil {
 		st, _ := status.FromError(err)
 		r.logger.Error(fmt.Errorf("ValidateAccountData error: %v, grpc status: %v", err, st))
-		return nil, &domain.Error{Name: "internalError"}
+		return nil, commondomain.InternalError
 	}
 	if validationResponse.Error != nil {
 		return nil, domain.GrpcErrorMapToError(validationResponse.Error)
@@ -87,7 +88,7 @@ func (r *RegistrationService) getAccountByEmail(email string) (*grpcService.GetA
 	if err != nil {
 		st, _ := status.FromError(err)
 		r.logger.Error(fmt.Errorf("GetAccountByEmail error: %v, grpc status: %v", err, st))
-		return nil, &domain.Error{Name: "internalError"}
+		return nil, commondomain.InternalError
 	}
 	return accountGrpc, nil
 }
@@ -103,41 +104,40 @@ func (r *RegistrationService) cleanupExpiredSessions() {
 func (r *RegistrationService) Register(userData map[string]any, lang string) (*RegisterAnswer, error) {
 	r.cleanupExpiredSessions()
 
-	if _, domainErr := r.validateRegistrationData(userData, lang); domainErr != nil {
-		return nil, domainErr
+	if _, err := r.validateRegistrationData(userData, lang); err != nil {
+		return nil, err
 	}
 
 	email, ok := userData["email"].(string)
 	if !ok {
 		r.logger.Error(errors.New("email not found in response"))
-		return nil, &domain.Error{Name: "internalError"}
+		return nil, commondomain.InternalError
 	}
 
-	accountGrpc, domainErr := r.getAccountByEmail(email)
-	if domainErr != nil {
-		return nil, domainErr
+	accountGrpc, err := r.getAccountByEmail(email)
+	if err != nil {
+		return nil, err
 	}
 
 	var session *domain.RegistrationSession
-	var err error
 
 	if account, ok := accountGrpc.Result.(*grpcService.GetAccountResponse_Account); ok && account != nil {
 		session, err = r.createOrUpdateSession(email, "")
 		if err != nil {
 			r.logger.Error(err)
-			return nil, &domain.Error{Name: "internalError"}
+			return nil, err
 		}
 	} else {
 		var code string
 		code, err = generator.Reggen(r.CodeGenConfig.CodePattern, r.CodeGenConfig.CodeMaxLength)
 		if err != nil {
 			r.logger.Error(err)
-			return nil, &domain.Error{Name: "internalError"}
+			return nil, commondomain.InternalError
 		}
 		session, err = r.createOrUpdateSession(email, code)
 		if err != nil {
 			r.logger.Error(err)
-			return nil, &domain.Error{Name: "internalError"}
+			return nil, commondomain.InternalError
 		}
 	}
 
@@ -178,45 +178,30 @@ func (r *RegistrationService) validateConfirmationCode(email string, userData ma
 	session, err := r.registrationSessionRepository.FindByEmail(email)
 	if err != nil {
 		r.logger.Error(err)
-		return &domain.Error{Name: "internalError"}
+		return commondomain.InternalError
 	}
 	if session == nil {
-		return &domain.Error{
-			Name: "invalidCode",
-			FieldErrors: []domain.FieldError{
-				{Name: "code", Message: "invalidCode"},
-			},
-		}
+		return domain.InvalidCode
 	}
 	if session.CodeExpires.Before(time.Now()) {
-		return &domain.Error{
-			Name: "codeExpired",
-			FieldErrors: []domain.FieldError{
-				{Name: "code", Message: "codeExpired"},
-			},
-		}
+		return domain.CodeExpired
 	}
 	if code, ok := userData["code"].(string); (ok && code != session.Code) || code == "" {
-		return &domain.Error{
-			Name: "invalidCode",
-			FieldErrors: []domain.FieldError{
-				{Name: "code", Message: "invalidCode"},
-			},
-		}
+		return domain.InvalidCode
 	}
 	return nil
 }
 
 func (r *RegistrationService) ConfirmRegistration(userData map[string]any, lang string) error {
-	grpcMap, domainErr := r.validateRegistrationData(userData, lang)
-	if domainErr != nil {
-		return domainErr
+	grpcMap, err := r.validateRegistrationData(userData, lang)
+	if err != nil {
+		return err
 	}
 
 	email, ok := userData["email"].(string)
 	if !ok {
 		r.logger.Error(errors.New("email not found in userData"))
-		return &domain.Error{Name: "internalError"}
+		return commondomain.InternalError
 	}
 
 	if err := r.validateConfirmationCode(email, userData); err != nil {
@@ -237,7 +222,7 @@ func (r *RegistrationService) ConfirmRegistration(userData map[string]any, lang 
 	if err != nil {
 		st, _ := status.FromError(err)
 		r.logger.Error(fmt.Errorf("CreateAccount error: %v, grpc status: %v", err, st))
-		return &domain.Error{Name: "internalError"}
+		return commondomain.InternalError
 	}
 
 	if createAccountResponse.Error != nil {
@@ -246,7 +231,7 @@ func (r *RegistrationService) ConfirmRegistration(userData map[string]any, lang 
 
 	if err := r.registrationSessionRepository.DeleteByEmail(email); err != nil {
 		r.logger.Error(err)
-		return &domain.Error{Name: "internalError"}
+		return commondomain.InternalError
 	}
 
 	r.logger.Info("Account successfully created for email=" + email)

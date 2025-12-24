@@ -2,9 +2,9 @@ package validation
 
 import (
 	"errors"
+	commondomain "github.com/PavelShe11/studbridge/common/domain"
 	"reflect"
 	"strings"
-	"userMicro/internal/domain"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -33,7 +33,7 @@ func NewValidator() *Validator {
 }
 
 // Var validates a single variable and returns validation tag as error key
-func (v *Validator) Var(nameField string, field interface{}, tag string, error *domain.Error) {
+func (v *Validator) Var(nameField string, field interface{}, tag string, error *commondomain.BaseValidationError) {
 	err := v.validate.Var(field, tag)
 	if err == nil {
 		return
@@ -43,30 +43,30 @@ func (v *Validator) Var(nameField string, field interface{}, tag string, error *
 	errors.As(err, &validErr)
 
 	for _, e := range validErr {
-		error.FieldErrors = append(error.FieldErrors, domain.FieldError{
-			Name:    nameField,
-			Message: e.Tag(), // Returns validation tag: "required", "email", etc.
-			Params:  extractValidationParams(e),
+		error.FieldErrors = append(error.FieldErrors, commondomain.FieldError{
+			NameField: nameField,
+			Message:   e.Tag(), // Returns validation tag: "required", "email", etc.
+			Params:    extractValidationParams(e),
 		})
 	}
 }
 
 // Struct validates a struct and returns validation tags as error keys
-func (v *Validator) Struct(s interface{}) []domain.FieldError {
+func (v *Validator) Struct(s interface{}) []commondomain.FieldError {
 	err := v.validate.Struct(s)
 	if err == nil {
 		return nil
 	}
 
-	result := make([]domain.FieldError, 0)
+	result := make([]commondomain.FieldError, 0)
 	var validErr validator.ValidationErrors
 	errors.As(err, &validErr)
 
 	for _, err := range validErr {
-		result = append(result, domain.FieldError{
-			Name:    err.Field(),
-			Message: err.Tag(), // Returns validation tag: "required", "email", "min", etc.
-			Params:  extractValidationParams(err),
+		result = append(result, commondomain.FieldError{
+			NameField: err.Field(),
+			Message:   err.Tag(), // Returns validation tag: "required", "email", "min", etc.
+			Params:    extractValidationParams(err),
 		})
 	}
 	return result

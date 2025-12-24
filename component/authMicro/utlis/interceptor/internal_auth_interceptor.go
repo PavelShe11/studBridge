@@ -1,8 +1,8 @@
 package interceptor
 
 import (
-	"authMicro/utlis/logger"
 	"context"
+	"github.com/PavelShe11/studbridge/common/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"

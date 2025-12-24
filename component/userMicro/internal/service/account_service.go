@@ -1,10 +1,11 @@
 package service
 
 import (
-	"userMicro/internal/domain"
-	"userMicro/internal/repository"
-	"userMicro/utlis/logger"
-	"userMicro/utlis/validation"
+	commondomain "github.com/PavelShe11/studbridge/common/domain"
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/user/internal/domain"
+	"github.com/PavelShe11/studbridge/user/internal/repository"
+	"github.com/PavelShe11/studbridge/user/utlis/validation"
 )
 
 type AccountService struct {
@@ -25,7 +26,7 @@ func NewAccountService(
 	}
 }
 
-func (s *AccountService) CreateAccount(account domain.Account) *domain.Error {
+func (s *AccountService) CreateAccount(account domain.Account) error {
 	errs := s.ValidateAccountData(account)
 	if errs != nil {
 		return errs
@@ -33,36 +34,34 @@ func (s *AccountService) CreateAccount(account domain.Account) *domain.Error {
 	err := s.accountRepository.CreateAccount(account)
 	if err != nil {
 		s.logger.Error(err)
-		return &domain.Error{Name: "internalServerError"}
+		return commondomain.InternalError
 	}
 	return nil
 }
 
-func (s *AccountService) GetAccountByEmail(email string) (*domain.Account, *domain.Error) {
+func (s *AccountService) GetAccountByEmail(email string) (*domain.Account, error) {
 	account, err := s.accountRepository.GetAccountByEmail(email)
 	if account == nil && err == nil {
 		return nil, nil
 	}
 	if err != nil {
 		s.logger.Error(err)
-		return nil, &domain.Error{Name: "internalServerError"}
+		return nil, commondomain.InternalError
 	}
 	return account, nil
 }
 
-func (s *AccountService) GetAccountById(id string) (*domain.Account, *domain.Error) {
+func (s *AccountService) GetAccountById(id string) (*domain.Account, error) {
 	account, err := s.accountRepository.GetAccountById(id)
 	if err != nil {
 		s.logger.Error(err)
-		return nil, &domain.Error{Name: "internalServerError"}
+		return nil, commondomain.InternalError
 	}
 	return account, nil
 }
 
-func (s *AccountService) ValidateAccountData(account domain.Account) *domain.Error {
-	errs := &domain.Error{
-		Name: "validationError",
-	}
+func (s *AccountService) ValidateAccountData(account domain.Account) error {
+	errs := domain.ValidationError
 	errs.FieldErrors = s.validator.Struct(&account)
 	if len(errs.FieldErrors) > 0 {
 		return errs

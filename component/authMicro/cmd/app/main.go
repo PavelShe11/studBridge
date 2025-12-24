@@ -1,17 +1,17 @@
 package main
 
 import (
-	"authMicro/internal/api/grpcService"
-	"authMicro/internal/api/rest"
-	"authMicro/internal/api/rest/handler"
-	"authMicro/internal/config"
-	"authMicro/internal/repository"
-	"authMicro/internal/repository/database"
-	"authMicro/internal/service"
-	"authMicro/utlis/interceptor"
-	"authMicro/utlis/logger"
-	"authMicro/utlis/translator"
 	"context"
+	"github.com/PavelShe11/studbridge/auth/internal/api/grpcService"
+	"github.com/PavelShe11/studbridge/auth/internal/api/rest"
+	"github.com/PavelShe11/studbridge/auth/internal/api/rest/handler"
+	"github.com/PavelShe11/studbridge/auth/internal/config"
+	"github.com/PavelShe11/studbridge/auth/internal/repository"
+	"github.com/PavelShe11/studbridge/auth/internal/repository/database"
+	"github.com/PavelShe11/studbridge/auth/internal/service"
+	"github.com/PavelShe11/studbridge/auth/utlis/interceptor"
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/common/translator"
 	"os"
 	"os/signal"
 	"syscall"
@@ -83,6 +83,7 @@ func main() {
 	// REST server
 	router := rest.NewRouter(
 		l,
+		trans,
 		handler.NewRegisterHandler(l, registrationService, trans),
 		handler.NewLoginHandler(l, loginService),
 		handler.NewRefreshTokenHandler(l),
@@ -105,7 +106,7 @@ func main() {
 	defer cancel()
 
 	if err := router.Shutdown(ctx); err != nil {
-		l.Errorf("Name during server shutdown: %v", err)
+		l.Errorf("NameField during server shutdown: %v", err)
 	}
 
 	l.Info("Server exited properly")

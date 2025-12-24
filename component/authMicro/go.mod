@@ -1,9 +1,10 @@
-module authMicro
+module github.com/PavelShe11/studbridge/auth
 
 go 1.25.5
 
 require (
 	github.com/BurntSushi/toml v1.6.0
+	github.com/PavelShe11/studbridge/common v0.1.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/jmoiron/sqlx v1.4.0
@@ -16,6 +17,9 @@ require (
 	google.golang.org/grpc v1.77.0
 	google.golang.org/protobuf v1.36.10
 )
+
+// Temporary replace for local development (remove when published to GitHub)
+replace github.com/PavelShe11/studbridge/common => ../common
 
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect

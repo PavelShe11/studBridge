@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"authMicro/utlis/logger"
+	"github.com/PavelShe11/studbridge/common/logger"
 
 	"net/http"
 

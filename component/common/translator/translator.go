@@ -2,11 +2,12 @@ package translator
 
 import (
 	"errors"
-	error2 "github.com/PavelShe11/studbridge/auth/internal/domain"
-	"github.com/PavelShe11/studbridge/common/logger"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/PavelShe11/studbridge/common/domain"
+	"github.com/PavelShe11/studbridge/common/logger"
 
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -72,7 +73,7 @@ func (t *Translator) TranslateError(err error, langs ...string) {
 		return
 	}
 
-	var translatableErr error2.TranslatableError
+	var translatableErr domain.TranslatableError
 	ok := errors.As(err, &translatableErr)
 	if !ok {
 		t.log.Warnf("TranslateError called with non-translatable error type: %T", err)

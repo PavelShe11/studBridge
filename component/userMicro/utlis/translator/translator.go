@@ -1,11 +1,11 @@
 package translator
 
 import (
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/user/internal/domain"
 	"os"
 	"path/filepath"
 	"strings"
-	"userMicro/internal/domain"
-	"userMicro/utlis/logger"
 
 	"github.com/BurntSushi/toml"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
@@ -64,9 +64,9 @@ func NewTranslator(log logger.Logger) *Translator {
 	}
 }
 
-// TranslateError creates a localizer internally and translates the fields in a domain.Error object.
+// TranslateError creates a localizer internally and translates the fields in a domain.BaseError object.
 // Supports parameterized translations through TemplateData from error.FieldErrors[].Params
-func (t *Translator) TranslateError(err *domain.Error, langs ...string) {
+func (t *Translator) TranslateError(err *domain.BaseError, langs ...string) {
 	if err == nil {
 		return
 	}

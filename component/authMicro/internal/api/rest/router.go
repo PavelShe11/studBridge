@@ -1,10 +1,12 @@
 package rest
 
 import (
-	"authMicro/internal/api/rest/handler"
-	my_middleware "authMicro/internal/api/rest/middleware"
-	"authMicro/utlis/logger"
 	"context"
+	"github.com/PavelShe11/studbridge/auth/internal/api/rest/handler"
+	"github.com/PavelShe11/studbridge/auth/internal/api/rest/httpErrorHandler"
+	my_middleware "github.com/PavelShe11/studbridge/auth/internal/api/rest/middleware"
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/common/translator"
 	"os"
 
 	"github.com/labstack/echo/v4"
@@ -22,11 +24,15 @@ type Router struct {
 
 func NewRouter(
 	log logger.Logger,
+	translator *translator.Translator,
 	regHandler *handler.Register,
 	loginHandler *handler.Login,
 	refreshTokenHandler *handler.RefreshToken,
 ) *Router {
 	e := echo.New()
+	e.HTTPErrorHandler = httpErrorHandler.NewHttpErrorHandler(
+		httpErrorHandler.NewBaseErrorHandler(translator, log),
+	)
 
 	e.Use(my_middleware.RequestLogger(log))
 	if os.Getenv("LogLevel") == "debug" {

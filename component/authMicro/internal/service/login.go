@@ -1,6 +1,6 @@
 package service
 
-import "authMicro/internal/api/grpcService"
+import "github.com/PavelShe11/studbridge/auth/internal/api/grpcService"
 
 type LoginService struct {
 	accountService grpcService.AccountServiceClient

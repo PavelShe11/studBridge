@@ -3,8 +3,8 @@ package database
 import (
 	"errors"
 	"fmt"
+	"github.com/PavelShe11/studbridge/user/internal/config"
 	"time"
-	"userMicro/internal/config"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"

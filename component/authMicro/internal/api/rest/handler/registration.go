@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"authMicro/internal/service"
-	"authMicro/utlis/logger"
-	"authMicro/utlis/translator" // Added translator import
+	"github.com/PavelShe11/studbridge/auth/internal/api/rest/httpErrorHandler"
+	"github.com/PavelShe11/studbridge/auth/internal/service"
+	"github.com/PavelShe11/studbridge/common/logger"
+	"github.com/PavelShe11/studbridge/common/translator" // Added translator import
 	"net/http"
-	"strings" // Added strings import
 
 	"github.com/labstack/echo/v4"
 )
@@ -34,7 +34,7 @@ func (h *Register) SendRegistrationCode(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	lang := getLangFromHeader(c)                             // Get language from header
+	lang := httpErrorHandler.GetLangFromHeader(c)            // Get language from header
 	answer, err := h.registrationService.Register(req, lang) // Pass language to service
 	if err != nil {
 		// Translate error before returning
@@ -51,7 +51,7 @@ func (h *Register) RegistrationConfirmEmail(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	lang := getLangFromHeader(c)                                // Get language from header
+	lang := httpErrorHandler.GetLangFromHeader(c)               // Get language from header
 	err := h.registrationService.ConfirmRegistration(req, lang) // Pass language to service
 	if err != nil {
 		// Translate error before returning
@@ -60,22 +60,4 @@ func (h *Register) RegistrationConfirmEmail(c echo.Context) error {
 	}
 
 	return c.NoContent(http.StatusOK)
-}
-
-// getLangFromHeader extracts language preferences from the Accept-Language header.
-// It returns the preferred language or "en" as default.
-func getLangFromHeader(c echo.Context) string {
-	acceptLanguage := c.Request().Header.Get("Accept-Language")
-	if acceptLanguage == "" {
-		return "en" // Default language
-	}
-
-	// Basic parsing: split by comma and take the first one.
-	// In a real app, you'd use a more robust Accept-Language parser.
-	langs := strings.Split(acceptLanguage, ",")
-	if len(langs) > 0 {
-		return strings.TrimSpace(strings.Split(langs[0], ";")[0])
-	}
-
-	return "en" // Fallback
 }

@@ -3,7 +3,7 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"userMicro/internal/domain"
+	"github.com/PavelShe11/studbridge/user/internal/domain"
 
 	"github.com/jmoiron/sqlx"
 )

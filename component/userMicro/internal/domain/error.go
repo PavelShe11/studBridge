@@ -1,12 +1,12 @@
 package domain
 
-type Error struct {
-	Name        string
-	FieldErrors []FieldError
-}
+import (
+	"github.com/PavelShe11/studbridge/common/domain"
+)
 
-type FieldError struct {
-	Name    string            `json:"name"`
-	Message string            `json:"message"`
-	Params  map[string]string `json:"-"` // Parameters for validation errors (not serialized to JSON)
-}
+var (
+	ValidationError = &domain.BaseValidationError{
+		BaseError:   domain.BaseError{Code: "validationError"},
+		FieldErrors: make([]domain.FieldError, 0),
+	}
+)
