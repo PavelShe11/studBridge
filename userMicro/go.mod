@@ -4,6 +4,7 @@ go 1.25.5
 
 require (
 	github.com/BurntSushi/toml v1.6.0
+	github.com/PavelShe11/studbridge/common v0.1.1
 	github.com/go-playground/validator/v10 v10.30.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/jackc/pgx/v5 v5.7.6
@@ -16,7 +17,6 @@ require (
 )
 
 require (
-	github.com/PavelShe11/studbridge/common v0.1.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.12 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
@@ -32,6 +32,3 @@ require (
 	golang.org/x/sys v0.39.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 )
-
-// Replace directive for local development (module path doesn't match directory structure)
-replace github.com/PavelShe11/studbridge/common => ../common
