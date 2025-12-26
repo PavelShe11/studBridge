@@ -1,7 +1,7 @@
 package service
 
 import (
-	"github.com/PavelShe11/studbridge/auth/grpcApi"
+	"github.com/PavelShe11/studbridge/authMicro/grpcApi"
 )
 
 type LoginService struct {

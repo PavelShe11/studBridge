@@ -1,4 +1,4 @@
-module github.com/PavelShe11/studbridge/auth/grpcApi
+module github.com/PavelShe11/studbridge/authMicro/grpcApi
 
 go 1.25.5
 

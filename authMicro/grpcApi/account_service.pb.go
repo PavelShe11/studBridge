@@ -450,7 +450,7 @@ const file_account_service_proto_rawDesc = "" +
 	"\rcreateAccount\x12\x15.CreateAccountRequest\x1a\x16.CreateAccountResponse\"\x00\x12E\n" +
 	"\x11getAccountByEmail\x12\x19.GetAccountByEmailRequest\x1a\x13.GetAccountResponse\"\x00\x12?\n" +
 	"\x0egetAccountById\x12\x16.GetAccountByIdRequest\x1a\x13.GetAccountResponse\"\x00\x12J\n" +
-	"\x13validateAccountData\x12\x17.ValidateAccountRequest\x1a\x18.ValidateAccountResponse\"\x00B/Z-github.com/PavelShe11/studbridge/auth/grpcApib\x06proto3"
+	"\x13validateAccountData\x12\x17.ValidateAccountRequest\x1a\x18.ValidateAccountResponse\"\x00B4Z2github.com/PavelShe11/studbridge/authMicro/grpcApib\x06proto3"
 
 var (
 	file_account_service_proto_rawDescOnce sync.Once

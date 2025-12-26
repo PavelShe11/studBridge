@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/PavelShe11/studbridge/auth/grpcApi";
+option go_package = "github.com/PavelShe11/studbridge/authMicro/grpcApi";
 
 enum ErrorCode {
   VALIDATION = 0;

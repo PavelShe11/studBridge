@@ -7,7 +7,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/PavelShe11/studbridge/auth/grpcApi"
 	"github.com/PavelShe11/studbridge/auth/internal/api/rest"
 	"github.com/PavelShe11/studbridge/auth/internal/api/rest/handler"
 	"github.com/PavelShe11/studbridge/auth/internal/config"
@@ -15,6 +14,7 @@ import (
 	"github.com/PavelShe11/studbridge/auth/internal/repository/database"
 	"github.com/PavelShe11/studbridge/auth/internal/service"
 	"github.com/PavelShe11/studbridge/auth/utlis/interceptor"
+	"github.com/PavelShe11/studbridge/authMicro/grpcApi"
 	"github.com/PavelShe11/studbridge/common/logger"
 	"github.com/PavelShe11/studbridge/common/translator"
 

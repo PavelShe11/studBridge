@@ -6,12 +6,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/PavelShe11/studbridge/auth/grpcApi"
 	"github.com/PavelShe11/studbridge/auth/internal/config"
 	"github.com/PavelShe11/studbridge/auth/internal/domain"
 	"github.com/PavelShe11/studbridge/auth/internal/repository"
 	"github.com/PavelShe11/studbridge/auth/utlis/converter"
 	"github.com/PavelShe11/studbridge/auth/utlis/generator"
+	"github.com/PavelShe11/studbridge/authMicro/grpcApi"
 	commondomain "github.com/PavelShe11/studbridge/common/domain"
 	"github.com/PavelShe11/studbridge/common/logger"
 

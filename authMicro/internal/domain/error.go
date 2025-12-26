@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/PavelShe11/studbridge/auth/grpcApi"
+	"github.com/PavelShe11/studbridge/authMicro/grpcApi"
 	"github.com/PavelShe11/studbridge/common/domain"
 )
 
