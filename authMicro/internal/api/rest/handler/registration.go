@@ -13,13 +13,13 @@ import (
 
 type Register struct {
 	logger              logger.Logger
-	registrationService service.RegistrationService
+	registrationService *service.RegistrationService
 	translator          *translator.Translator // Added translator field
 }
 
 func NewRegisterHandler(
 	logger logger.Logger,
-	registrationService service.RegistrationService,
+	registrationService *service.RegistrationService,
 	translator *translator.Translator, // Added translator parameter
 ) *Register {
 	return &Register{

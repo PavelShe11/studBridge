@@ -11,27 +11,27 @@ import (
 	"google.golang.org/grpc/reflection"
 )
 
-type Service struct {
+type Server struct {
 	address string
 	Server  *grpc.Server
 	logger  logger.Logger
 }
 
-func NewGRPCServer(config config.GRPCConfig, logger logger.Logger) *Service {
+func NewGRPCServer(config config.GRPCConfig, logger logger.Logger) *Server {
 	authInterceptor := interceptor.UnaryServerInternalAuthInterceptor(config.InternalAPIKey, logger)
 
 	server := grpc.NewServer(
 		grpc.UnaryInterceptor(authInterceptor),
 	)
 
-	return &Service{
+	return &Server{
 		address: config.ServerAddr,
 		Server:  server,
 		logger:  logger,
 	}
 }
 
-func (s *Service) Start() error {
+func (s *Server) Start() error {
 	lis, err := net.Listen("tcp", s.address)
 	if err != nil {
 		return err
@@ -43,7 +43,7 @@ func (s *Service) Start() error {
 	return s.Server.Serve(lis)
 }
 
-func (s *Service) Stop() {
+func (s *Server) Stop() {
 	if s.Server != nil {
 		s.logger.Info("Gracefully stopping gRPC Server")
 		s.Server.GracefulStop()

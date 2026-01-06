@@ -26,17 +26,17 @@ type Tokens struct {
 }
 
 type TokenService struct {
-	jwtConfig               *config.JWTConfig
 	refreshTokenSessionRepo *repository.RefreshTokenSessionRepository
 	accountServiceClient    grpcApi.AccountServiceClient
+	jwtConfig               config.JWTConfig
 	logger                  logger.Logger
 }
 
 func NewTokenService(
-	jwtConfig *config.JWTConfig,
 	refreshTokenSessionRepo *repository.RefreshTokenSessionRepository,
 	accountServiceClient grpcApi.AccountServiceClient,
 	logger logger.Logger,
+	jwtConfig config.JWTConfig,
 ) *TokenService {
 	return &TokenService{
 		jwtConfig:               jwtConfig,

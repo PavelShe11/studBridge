@@ -17,54 +17,140 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-func main() {
-	l := logger.NewLogger()
-	v := validation.NewValidator()
-	trans := translator.NewTranslator(l)
+type commonModule struct {
+	logger     logger.Logger
+	translator *translator.Translator
+	config     *config.Config
+	validator  *validation.Validator
+}
 
+type repositoriesModule struct {
+	db                *sqlx.DB
+	accountRepository *repository.AccountRepository
+}
+
+func (r *repositoriesModule) Close(l logger.Logger) {
+	if err := r.db.Close(); err != nil {
+		l.Errorf("Failed to close database connection: %v", err)
+	} else {
+		l.Info("Database connection closed")
+	}
+}
+
+type servicesModule struct {
+	accountService *service.AccountService
+}
+
+type grpcServerModule struct {
+	server *grpc.Server
+}
+
+func (g *grpcServerModule) Close(l logger.Logger) {
+	g.server.Stop()
+	l.Info("gRPC server stopped")
+}
+
+type app struct {
+	common       *commonModule
+	repositories *repositoriesModule
+	services     *servicesModule
+	grpcServer   *grpcServerModule
+}
+
+func newCommonModule() *commonModule {
+	l := logger.NewLogger()
+	trans := translator.NewTranslator(l)
 	cfg, errors := config.NewConfig()
+	v := validation.NewValidator()
 	if len(errors) > 0 {
-		for _, e := range errors {
-			l.Errorf(e.Error())
+		for _, err := range errors {
+			l.Error(err.Error())
 		}
+		l.Fatal("Failed to initialize configuration")
 	}
 
-	pg, err := database.NewPostgresDB(cfg.DB)
+	return &commonModule{
+		logger:     l,
+		translator: trans,
+		config:     cfg,
+		validator:  v,
+	}
+}
+
+func newRepositoriesModule(common *commonModule) *repositoriesModule {
+	l := common.logger
+	db, err := database.NewPostgresDB(common.config.DB)
 	if err != nil {
 		l.Fatalf("Failed to initialize database connection: %v", err)
 	}
-	defer func(db *sqlx.DB) {
-		err := db.Close()
-		if err != nil {
-			l.Fatalf("Failed to close database connection: %v", err)
-		}
-	}(pg)
 	l.Info("Database connection established")
-	if err := database.InitSchema(pg); err != nil {
+
+	if err := database.InitSchema(db); err != nil {
 		l.Fatalf("Failed to initialize database schema: %v", err)
 	}
 
-	accountRepository := repository.NewAccountRepository(pg)
+	return &repositoriesModule{
+		db:                db,
+		accountRepository: repository.NewAccountRepository(db),
+	}
+}
 
-	accountService := service.NewAccountService(accountRepository, l, v)
+func newServicesModule(common *commonModule, repositories *repositoriesModule) *servicesModule {
+	return &servicesModule{
+		accountService: service.NewAccountService(
+			repositories.accountRepository,
+			common.logger,
+			common.validator,
+		),
+	}
+}
 
-	grpcServer := grpc.NewGRPCServer(cfg.Grpc, l)
+func newGrpcServerModule(common *commonModule, services *servicesModule) *grpcServerModule {
+	grpcServer := grpc.NewGRPCServer(common.config.Grpc, common.logger)
+	accountGrpcService.Register(grpcServer.Server, *services.accountService, common.translator)
 
-	accountGrpcService.Register(grpcServer.Server, *accountService, trans)
+	return &grpcServerModule{
+		server: grpcServer,
+	}
+}
 
+func newApp() *app {
+	common := newCommonModule()
+	repositories := newRepositoriesModule(common)
+	services := newServicesModule(common, repositories)
+	grpcServer := newGrpcServerModule(common, services)
+
+	return &app{
+		common:       common,
+		repositories: repositories,
+		services:     services,
+		grpcServer:   grpcServer,
+	}
+}
+
+func (a *app) start() {
 	go func() {
-		if err := grpcServer.Start(); err != nil {
-			l.Fatalf("Failed to start grpcService server: %v", err)
+		if err := a.grpcServer.server.Start(); err != nil {
+			a.common.logger.Fatalf("Failed to start gRPC server: %v", err)
 		}
 	}()
-	defer func() {
-		grpcServer.Stop()
-		l.Info("Server gracefully stopped")
-	}()
+}
+
+func (a *app) shutdown() {
+	a.common.logger.Info("Shutting down server...")
+
+	a.grpcServer.Close(a.common.logger)
+	a.repositories.Close(a.common.logger)
+
+	a.common.logger.Info("Server exited properly")
+}
+
+func main() {
+	app := newApp()
+	defer app.shutdown()
+	app.start()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-
 	<-quit
-	l.Info("Shutting down server...")
 }

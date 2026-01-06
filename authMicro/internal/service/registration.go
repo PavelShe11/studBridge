@@ -27,14 +27,14 @@ type RegisterAnswer struct {
 }
 
 type RegistrationService struct {
-	registrationSessionRepository repository.RegistrationSessionRepository
+	registrationSessionRepository *repository.RegistrationSessionRepository
 	accountServiceClient          grpcApi.AccountServiceClient
 	logger                        logger.Logger
-	CodeGenConfig                 *config.CodeGenConfig
+	CodeGenConfig                 config.CodeGenConfig
 }
 
-func NewRegistrationService(registrationSessionRepository repository.RegistrationSessionRepository, accountServiceClient grpcApi.AccountServiceClient, logger logger.Logger, codeGenConfig *config.CodeGenConfig) RegistrationService {
-	return RegistrationService{
+func NewRegistrationService(registrationSessionRepository *repository.RegistrationSessionRepository, accountServiceClient grpcApi.AccountServiceClient, logger logger.Logger, codeGenConfig config.CodeGenConfig) *RegistrationService {
+	return &RegistrationService{
 		registrationSessionRepository: registrationSessionRepository,
 		accountServiceClient:          accountServiceClient,
 		logger:                        logger,

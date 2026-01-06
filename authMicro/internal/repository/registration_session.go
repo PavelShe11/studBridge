@@ -20,7 +20,7 @@ func NewRegistrationSessionRepository(db *sqlx.DB) *RegistrationSessionRepositor
 	}
 }
 
-func (r RegistrationSessionRepository) FindByEmail(email string) (*entity.RegistrationSession, error) {
+func (r *RegistrationSessionRepository) FindByEmail(email string) (*entity.RegistrationSession, error) {
 	query := "SELECT * FROM registration_session WHERE email = $1"
 	result := &entity.RegistrationSession{}
 	row := r.db.QueryRowx(query, email)
@@ -34,7 +34,7 @@ func (r RegistrationSessionRepository) FindByEmail(email string) (*entity.Regist
 	return result, nil
 }
 
-func (r RegistrationSessionRepository) Save(session *entity.RegistrationSession) error {
+func (r *RegistrationSessionRepository) Save(session *entity.RegistrationSession) error {
 	query := `INSERT INTO registration_session (code, email, code_expires)
 	VALUES ($1, $2, $3)
 	ON CONFLICT (email)
@@ -49,7 +49,7 @@ func (r RegistrationSessionRepository) Save(session *entity.RegistrationSession)
 	return nil
 }
 
-func (r RegistrationSessionRepository) DeleteByEmail(email string) error {
+func (r *RegistrationSessionRepository) DeleteByEmail(email string) error {
 	query := "DELETE FROM registration_session WHERE email = $1"
 	_, err := r.db.Exec(query, email)
 	if err != nil {
@@ -58,7 +58,7 @@ func (r RegistrationSessionRepository) DeleteByEmail(email string) error {
 	return nil
 }
 
-func (r RegistrationSessionRepository) CleanExpired(ctx context.Context) error {
+func (r *RegistrationSessionRepository) CleanExpired(ctx context.Context) error {
 	query := "DELETE FROM registration_session WHERE code_expires < NOW()"
 	_, err := r.db.ExecContext(ctx, query)
 	if err != nil {

@@ -30,18 +30,18 @@ type ConfirmLoginEmailAnswer struct {
 }
 
 type LoginService struct {
-	loginSessionRepository repository.LoginSessionRepository
+	loginSessionRepository *repository.LoginSessionRepository
 	accountService         grpcApi.AccountServiceClient
 	logger                 logger.Logger
-	CodeGenConfig          *config.CodeGenConfig
+	CodeGenConfig          config.CodeGenConfig
 	validator              *validation.Validator
 }
 
 func NewLoginService(
-	loginSessionRepository repository.LoginSessionRepository,
+	loginSessionRepository *repository.LoginSessionRepository,
 	accountService grpcApi.AccountServiceClient,
 	logger logger.Logger,
-	codeGenConfig *config.CodeGenConfig,
+	codeGenConfig config.CodeGenConfig,
 	validator *validation.Validator,
 ) *LoginService {
 	return &LoginService{
@@ -239,20 +239,14 @@ func (l *LoginService) ConfirmLogin(email string, code string) (string, error) {
 
 	accountStillValid, _ := l.verifyAccountStillValid(email, *accountId)
 
-	if !accountStillValid {
-		l.logger.Info(fmt.Sprintf("Account switch detected for email %s", email))
-
-		if err := l.loginSessionRepository.DeleteByEmail(context.Background(), email); err != nil {
-			l.logger.Error(fmt.Errorf("failed to delete session after account switch: %w", err))
-			return "", commonEntity.NewInternalError()
-		}
-
-		return "", entity.NewInvalidCodeError()
+	if err := l.loginSessionRepository.DeleteByEmail(context.Background(), email); err != nil {
+		l.logger.Error(fmt.Errorf("failed to delete session after account switch: %w", err))
+		return "", commonEntity.NewInternalError()
 	}
 
-	if err := l.loginSessionRepository.DeleteByEmail(context.Background(), email); err != nil {
-		l.logger.Error(err)
-		return "", commonEntity.NewInternalError()
+	if !accountStillValid {
+		l.logger.Info(fmt.Sprintf("Account switch detected for email %s", email))
+		return "", entity.NewInvalidCodeError()
 	}
 
 	return *accountId, nil
