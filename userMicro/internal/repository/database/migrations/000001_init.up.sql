@@ -4,4 +4,6 @@ CREATE TABLE account
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     email TEXT NOT NULL
-)
+);
+
+CREATE UNIQUE INDEX idx_account_email ON account(email);

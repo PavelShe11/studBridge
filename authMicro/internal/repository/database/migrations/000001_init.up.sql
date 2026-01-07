@@ -25,3 +25,8 @@ CREATE TABLE refresh_token_session
     expires_at    TIMESTAMP NOT NULL,
     created_at    TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX idx_refresh_token_session_refresh_token ON refresh_token_session(refresh_token);
+CREATE INDEX idx_refresh_token_session_expires_at ON refresh_token_session(expires_at);
+CREATE INDEX idx_login_session_code_expires ON login_session(code_expires);
+CREATE INDEX idx_registration_session_code_expires ON registration_session(code_expires);
