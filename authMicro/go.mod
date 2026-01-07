@@ -20,6 +20,9 @@ require (
 require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/KyleBanks/depth v1.2.1 // indirect
+	github.com/avito-tech/go-transaction-manager/drivers/sql/v2 v2.0.1 // indirect
+	github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2 v2.0.2 // indirect
+	github.com/avito-tech/go-transaction-manager/trm/v2 v2.0.2 // indirect
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/go-openapi/jsonpointer v0.22.3 // indirect
 	github.com/go-openapi/jsonreference v0.21.3 // indirect

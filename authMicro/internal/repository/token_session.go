@@ -6,15 +6,20 @@ import (
 	"errors"
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
+	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/jmoiron/sqlx"
 )
 
 type RefreshTokenSessionRepository struct {
-	db *sqlx.DB
+	db     *sqlx.DB
+	getter *trmsql.CtxGetter
 }
 
-func NewRefreshTokenSessionRepository(db *sqlx.DB) *RefreshTokenSessionRepository {
-	return &RefreshTokenSessionRepository{db: db}
+func NewRefreshTokenSessionRepository(db *sqlx.DB, getter *trmsql.CtxGetter) *RefreshTokenSessionRepository {
+	return &RefreshTokenSessionRepository{
+		db:     db,
+		getter: getter,
+	}
 }
 
 // Save сохраняет новую сессию refresh token
@@ -27,7 +32,7 @@ func (r *RefreshTokenSessionRepository) Save(
 		VALUES ($1, $2, $3)
 		RETURNING id, created_at
 	`
-	return r.db.QueryRowxContext(
+	return r.getter.DefaultTrOrDB(ctx, r.db).QueryRowxContext(
 		ctx,
 		query,
 		session.AccountID,
@@ -43,7 +48,7 @@ func (r *RefreshTokenSessionRepository) FindByToken(
 ) (*entity.RefreshTokenSession, error) {
 	var session entity.RefreshTokenSession
 	query := `SELECT * FROM refresh_token_session WHERE refresh_token = $1`
-	err := r.db.GetContext(ctx, &session, query, token)
+	err := r.getter.DefaultTrOrDB(ctx, r.db).GetContext(ctx, &session, query, token)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -53,13 +58,13 @@ func (r *RefreshTokenSessionRepository) FindByToken(
 // DeleteByToken удаляет сессию по токену
 func (r *RefreshTokenSessionRepository) DeleteByToken(ctx context.Context, token string) error {
 	query := `DELETE FROM refresh_token_session WHERE refresh_token = $1`
-	_, err := r.db.ExecContext(ctx, query, token)
+	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, token)
 	return err
 }
 
 // CleanExpired удаляет истекшие сессии
 func (r *RefreshTokenSessionRepository) CleanExpired(ctx context.Context) error {
 	query := `DELETE FROM refresh_token_session WHERE expires_at < NOW()`
-	_, err := r.db.ExecContext(ctx, query)
+	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
 	return err
 }

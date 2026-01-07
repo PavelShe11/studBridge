@@ -2,6 +2,7 @@ package handler
 
 import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/service"
+	"github.com/PavelShe11/studbridge/authMicro/internal/usecase"
 	"github.com/PavelShe11/studbridge/common/logger"
 
 	"net/http"
@@ -10,16 +11,20 @@ import (
 )
 
 type Login struct {
-	logger       logger.Logger
-	loginService *service.LoginService
-	tokenService *service.TokenService
+	logger                  logger.Logger
+	loginService            *service.LoginService
+	authenticateUserUsecase *usecase.AuthenticateUser
 }
 
-func NewLoginHandler(logger logger.Logger, loginService *service.LoginService, tokenService *service.TokenService) *Login {
+func NewLoginHandler(
+	logger logger.Logger,
+	loginService *service.LoginService,
+	authenticateUserUsecase *usecase.AuthenticateUser,
+) *Login {
 	return &Login{
-		logger:       logger,
-		loginService: loginService,
-		tokenService: tokenService,
+		logger:                  logger,
+		loginService:            loginService,
+		authenticateUserUsecase: authenticateUserUsecase,
 	}
 }
 
@@ -58,15 +63,9 @@ func (h *Login) ConfirmEmail(c echo.Context) error {
 		code = ""
 	}
 
-	accountId, err := h.loginService.ConfirmLogin(c.Request().Context(), email, code)
+	tokens, err := h.authenticateUserUsecase.Execute(c.Request().Context(), email, code)
 	if err != nil {
 		return err
 	}
-
-	tokens, err := h.tokenService.CreateTokens(c.Request().Context(), accountId)
-	if err != nil {
-		return err
-	}
-
 	return c.JSON(http.StatusOK, tokens)
 }
