@@ -5,34 +5,38 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
 	"github.com/PavelShe11/studbridge/authMicro/internal/repository"
+	"github.com/PavelShe11/studbridge/authMicro/utlis/token_generator"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
 	"github.com/PavelShe11/studbridge/common/logger"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type TokenService struct {
 	refreshTokenSessionRepo *repository.RefreshTokenSessionRepository
 	accountProvider         port.AccountProvider
-	jwtConfig               config.JWTConfig
+	tokenGenerator          token_generator.TokenGenerator
 	logger                  logger.Logger
+	accessTokenTTL          time.Duration
+	refreshTokenTTL         time.Duration
 }
 
 func NewTokenService(
 	refreshTokenSessionRepo *repository.RefreshTokenSessionRepository,
 	accountProvider port.AccountProvider,
+	tokenGenerator token_generator.TokenGenerator,
 	logger logger.Logger,
-	jwtConfig config.JWTConfig,
+	accessTokenTTL time.Duration,
+	refreshTokenTTL time.Duration,
 ) *TokenService {
 	return &TokenService{
-		jwtConfig:               jwtConfig,
 		refreshTokenSessionRepo: refreshTokenSessionRepo,
 		accountProvider:         accountProvider,
+		tokenGenerator:          tokenGenerator,
 		logger:                  logger,
+		accessTokenTTL:          accessTokenTTL,
+		refreshTokenTTL:         refreshTokenTTL,
 	}
 }
 
@@ -52,8 +56,8 @@ func (s *TokenService) CreateTokens(ctx context.Context, accountId string) (*ent
 	}
 
 	now := time.Now()
-	refreshExpiry := now.Add(s.jwtConfig.RefreshTokenExpiration)
-	accessExpiry := now.Add(s.jwtConfig.AccessTokenExpiration)
+	refreshExpiry := now.Add(s.refreshTokenTTL)
+	accessExpiry := now.Add(s.accessTokenTTL)
 
 	refreshTokenString, accessTokenString, err := s.generateTokenPair(
 		accountId,
@@ -87,28 +91,13 @@ func (s *TokenService) CreateTokens(ctx context.Context, accountId string) (*ent
 }
 
 func (s *TokenService) RefreshTokens(ctx context.Context, refreshTokenString string) (*entity.Tokens, error) {
-	claims := jwt.MapClaims{}
-	token, err := jwt.ParseWithClaims(
-		refreshTokenString,
-		claims,
-		func(token *jwt.Token) (interface{}, error) {
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-			}
-			return []byte(s.jwtConfig.Secret), nil
-		},
-	)
-
-	if err != nil || !token.Valid {
+	parsedToken, err := s.tokenGenerator.ParseToken(refreshTokenString)
+	if err != nil || !parsedToken.Valid {
 		s.logger.Debug(err)
 		return nil, entity.NewInvalidRefreshTokenError()
 	}
 
-	sub, ok := claims["sub"].(string)
-	if !ok || sub == "" {
-		s.logger.Error("sub not found in refresh token")
-		return nil, entity.NewInvalidRefreshTokenError()
-	}
+	accountId := parsedToken.Subject
 
 	session, err := s.refreshTokenSessionRepo.FindByToken(ctx, refreshTokenString)
 	if err != nil {
@@ -124,54 +113,47 @@ func (s *TokenService) RefreshTokens(ctx context.Context, refreshTokenString str
 		return nil, entity.NewRefreshTokenExpiredError()
 	}
 
-	if err := s.refreshTokenSessionRepo.DeleteByToken(ctx, refreshTokenString); err != nil {
-		s.logger.Error(err)
-	}
+	defer func() {
+		if err := s.refreshTokenSessionRepo.DeleteByToken(ctx, refreshTokenString); err != nil {
+			s.logger.Error(err)
+		}
+	}()
 
-	return s.CreateTokens(ctx, sub)
+	return s.CreateTokens(ctx, accountId)
 }
 
 func (s *TokenService) generateTokenPair(
 	accountId string,
-	claimsResult map[string]interface{},
+	extraClaims map[string]interface{},
 	now time.Time,
 	refreshExpiry time.Time,
 	accessExpiry time.Time,
 ) (refreshToken string, accessToken string, err error) {
-	baseClaims := jwt.MapClaims{
-		"sub": accountId,
-		"iat": now.Unix(),
-		"nbf": now.Unix(),
+
+	refreshClaims := token_generator.TokenClaims{
+		Subject:   accountId,
+		IssuedAt:  now,
+		NotBefore: now,
+		ExpiresAt: refreshExpiry,
+		Extra:     nil,
 	}
 
-	if claimsResult != nil {
-		for key, value := range claimsResult {
-			baseClaims[key] = value
-		}
-	}
-
-	refreshClaims := jwt.MapClaims{
-		"sub": accountId,
-		"iat": now.Unix(),
-		"nbf": now.Unix(),
-		"exp": refreshExpiry.Unix(),
-	}
-	refreshJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	refreshToken, err = refreshJWT.SignedString([]byte(s.jwtConfig.Secret))
+	refreshToken, err = s.tokenGenerator.GenerateToken(refreshClaims)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to sign refresh token: %w", err)
+		return "", "", fmt.Errorf("failed to generate refresh token: %w", err)
 	}
 
-	accessClaims := make(jwt.MapClaims, len(baseClaims)+1)
-	for key, value := range baseClaims {
-		accessClaims[key] = value
+	accessClaims := token_generator.TokenClaims{
+		Subject:   accountId,
+		IssuedAt:  now,
+		NotBefore: now,
+		ExpiresAt: accessExpiry,
+		Extra:     extraClaims,
 	}
-	accessClaims["exp"] = accessExpiry.Unix()
 
-	accessJWT := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessToken, err = accessJWT.SignedString([]byte(s.jwtConfig.Secret))
+	accessToken, err = s.tokenGenerator.GenerateToken(accessClaims)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to sign access token: %w", err)
+		return "", "", fmt.Errorf("failed to generate access token: %w", err)
 	}
 
 	return refreshToken, accessToken, nil

@@ -21,6 +21,7 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/repository/database"
 	"github.com/PavelShe11/studbridge/authMicro/internal/service"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/interceptor"
+	jwtAdapter "github.com/PavelShe11/studbridge/authMicro/utlis/token_generator"
 	"github.com/PavelShe11/studbridge/common/logger"
 	"github.com/PavelShe11/studbridge/common/translator"
 	"github.com/PavelShe11/studbridge/common/validation"
@@ -145,6 +146,7 @@ func (r *repositoriesModule) Close(l logger.Logger) {
 
 type infrastructureModule struct {
 	accountProvider port.AccountProvider
+	tokenGenerator  jwtAdapter.TokenGenerator
 }
 
 func newInfrastructureModule(
@@ -156,8 +158,11 @@ func newInfrastructureModule(
 		commonModule.logger,
 	)
 
+	tokenGenerator := jwtAdapter.NewJwtTokenAdapter(commonModule.config.JWT)
+
 	return &infrastructureModule{
 		accountProvider: accountProvider,
+		tokenGenerator:  tokenGenerator,
 	}
 }
 
@@ -193,9 +198,11 @@ func newServicesModule(
 		),
 		tokenService: service.NewTokenService(
 			repositoriesModule.refreshTokenSessionRepository,
-			accountProvider,
+			infrastructureModule.accountProvider,
+			infrastructureModule.tokenGenerator,
 			commonModule.logger,
-			conf.JWT,
+			conf.JWT.AccessTokenExpiration,
+			conf.JWT.RefreshTokenExpiration,
 		),
 	}
 }
