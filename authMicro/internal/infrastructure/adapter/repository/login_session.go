@@ -6,24 +6,27 @@ import (
 	"errors"
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
+	"github.com/PavelShe11/studbridge/authMicro/internal/port"
 	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 
 	"github.com/jmoiron/sqlx"
 )
 
-type LoginSessionRepository struct {
+type loginSessionRepository struct {
 	db     *sqlx.DB
 	getter *trmsql.CtxGetter
 }
 
-func NewLoginSessionRepository(db *sqlx.DB, getter *trmsql.CtxGetter) *LoginSessionRepository {
-	return &LoginSessionRepository{
+var _ port.LoginSessionRepository = (*loginSessionRepository)(nil)
+
+func NewLoginSessionRepository(db *sqlx.DB, getter *trmsql.CtxGetter) port.LoginSessionRepository {
+	return &loginSessionRepository{
 		db:     db,
 		getter: getter,
 	}
 }
 
-func (r *LoginSessionRepository) FindByEmail(ctx context.Context, email string) (*entity.LoginSession, error) {
+func (r *loginSessionRepository) FindByEmail(ctx context.Context, email string) (*entity.LoginSession, error) {
 	query := "SELECT * FROM login_session WHERE email = $1"
 	result := &entity.LoginSession{}
 	row := r.getter.DefaultTrOrDB(ctx, r.db).QueryRowxContext(ctx, query, email)
@@ -37,7 +40,7 @@ func (r *LoginSessionRepository) FindByEmail(ctx context.Context, email string) 
 	return result, nil
 }
 
-func (r *LoginSessionRepository) Save(ctx context.Context, session *entity.LoginSession) error {
+func (r *loginSessionRepository) Save(ctx context.Context, session *entity.LoginSession) error {
 	query := `INSERT INTO login_session (account_id, email, code, code_expires)
 	VALUES ($1, $2, $3, $4)
 	ON CONFLICT (email)
@@ -51,7 +54,7 @@ func (r *LoginSessionRepository) Save(ctx context.Context, session *entity.Login
 	return nil
 }
 
-func (r *LoginSessionRepository) DeleteByEmail(ctx context.Context, email string) error {
+func (r *loginSessionRepository) DeleteByEmail(ctx context.Context, email string) error {
 	query := "DELETE FROM login_session WHERE email = $1"
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, email)
 	if err != nil {
@@ -60,7 +63,7 @@ func (r *LoginSessionRepository) DeleteByEmail(ctx context.Context, email string
 	return nil
 }
 
-func (r *LoginSessionRepository) CleanExpired(ctx context.Context) error {
+func (r *loginSessionRepository) CleanExpired(ctx context.Context) error {
 	query := "DELETE FROM login_session WHERE code_expires < NOW()"
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
 	if err != nil {

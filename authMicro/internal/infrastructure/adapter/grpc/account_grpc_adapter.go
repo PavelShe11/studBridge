@@ -14,25 +14,25 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-type AccountGrpcAdapter struct {
+type accountGrpcAdapter struct {
 	grpcClient grpcApi.AccountServiceClient
 	logger     logger.Logger
 }
 
 // Проверка реализации интерфейса на этапе компиляции
-var _ port.AccountProvider = (*AccountGrpcAdapter)(nil)
+var _ port.AccountProvider = (*accountGrpcAdapter)(nil)
 
 func NewAccountGrpcAdapter(
 	grpcClient grpcApi.AccountServiceClient,
 	logger logger.Logger,
 ) port.AccountProvider {
-	return &AccountGrpcAdapter{
+	return &accountGrpcAdapter{
 		grpcClient: grpcClient,
 		logger:     logger,
 	}
 }
 
-func (a *AccountGrpcAdapter) ValidateAccountData(
+func (a *accountGrpcAdapter) ValidateAccountData(
 	ctx context.Context,
 	userData map[string]interface{},
 	lang string,
@@ -64,7 +64,7 @@ func (a *AccountGrpcAdapter) ValidateAccountData(
 	return nil
 }
 
-func (a *AccountGrpcAdapter) CreateAccount(ctx context.Context, userData map[string]interface{}, lang string) error {
+func (a *accountGrpcAdapter) CreateAccount(ctx context.Context, userData map[string]interface{}, lang string) error {
 	grpcMap, err := converter.ConvertToGrpcMap(userData)
 	if err != nil {
 		a.logger.Error(err)
@@ -88,7 +88,7 @@ func (a *AccountGrpcAdapter) CreateAccount(ctx context.Context, userData map[str
 	return nil
 }
 
-func (a *AccountGrpcAdapter) GetAccountByEmail(ctx context.Context, email string) (*entity.Account, error) {
+func (a *accountGrpcAdapter) GetAccountByEmail(ctx context.Context, email string) (*entity.Account, error) {
 	response, err := a.grpcClient.GetAccountByEmail(ctx, &grpcApi.GetAccountByEmailRequest{Email: email})
 	if err != nil {
 		st, _ := status.FromError(err)
@@ -112,7 +112,7 @@ func (a *AccountGrpcAdapter) GetAccountByEmail(ctx context.Context, email string
 	return nil, nil
 }
 
-func (a *AccountGrpcAdapter) GetAccessTokenPayload(ctx context.Context, accountId string) (map[string]interface{}, error) {
+func (a *accountGrpcAdapter) GetAccessTokenPayload(ctx context.Context, accountId string) (map[string]interface{}, error) {
 	response, err := a.grpcClient.GetAccessTokenPayload(ctx, &grpcApi.GetAccessTokenPayloadRequest{AccountId: accountId})
 	if err != nil {
 		st, _ := status.FromError(err)

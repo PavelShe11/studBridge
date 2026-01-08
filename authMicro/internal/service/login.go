@@ -8,7 +8,6 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
-	"github.com/PavelShe11/studbridge/authMicro/internal/repository"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/generator"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/hash"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
@@ -29,7 +28,7 @@ type ConfirmLoginEmailAnswer struct {
 }
 
 type LoginService struct {
-	loginSessionRepository *repository.LoginSessionRepository
+	loginSessionRepository port.LoginSessionRepository
 	accountProvider        port.AccountProvider
 	logger                 logger.Logger
 	CodeGenConfig          config.CodeGenConfig
@@ -37,7 +36,7 @@ type LoginService struct {
 }
 
 func NewLoginService(
-	loginSessionRepository *repository.LoginSessionRepository,
+	loginSessionRepository port.LoginSessionRepository,
 	accountProvider port.AccountProvider,
 	logger logger.Logger,
 	codeGenConfig config.CodeGenConfig,

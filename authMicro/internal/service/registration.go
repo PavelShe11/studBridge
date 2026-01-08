@@ -9,7 +9,6 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
-	"github.com/PavelShe11/studbridge/authMicro/internal/repository"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/generator"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/hash"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
@@ -22,14 +21,14 @@ type RegisterAnswer struct {
 }
 
 type RegistrationService struct {
-	registrationSessionRepository *repository.RegistrationSessionRepository
+	registrationSessionRepository port.RegistrationSessionRepository
 	accountProvider               port.AccountProvider
 	logger                        logger.Logger
 	CodeGenConfig                 config.CodeGenConfig
 }
 
 func NewRegistrationService(
-	registrationSessionRepository *repository.RegistrationSessionRepository,
+	registrationSessionRepository port.RegistrationSessionRepository,
 	accountProvider port.AccountProvider,
 	logger logger.Logger,
 	codeGenConfig config.CodeGenConfig,

@@ -16,7 +16,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -gcflags "all=-N -l" -o auth-app ./authMic
 FROM alpine:3.19 AS run-debug
 WORKDIR /app
 COPY --from=builder-debug /workspace/auth-app .
-COPY --from=builder-debug /workspace/authMicro/internal/repository/database/migrations /migrations
+COPY --from=builder-debug /workspace/authMicro/internal/infrastructure/adapter/repository/database/migrations /migrations
 COPY --from=builder-debug /workspace/authMicro/locales ./locales
 COPY --from=builder-debug /go/bin/dlv /usr/local/bin/dlv
 EXPOSE 80

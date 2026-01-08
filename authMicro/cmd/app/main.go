@@ -7,6 +7,8 @@ import (
 	"syscall"
 	"time"
 
+	repository2 "github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/adapter/repository"
+	"github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/adapter/repository/database"
 	"github.com/PavelShe11/studbridge/authMicro/internal/usecase"
 	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	trmcontext "github.com/avito-tech/go-transaction-manager/trm/v2/context"
@@ -17,8 +19,6 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 	grpcAdapter "github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/adapter/grpc"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
-	"github.com/PavelShe11/studbridge/authMicro/internal/repository"
-	"github.com/PavelShe11/studbridge/authMicro/internal/repository/database"
 	"github.com/PavelShe11/studbridge/authMicro/internal/service"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/interceptor"
 	jwtAdapter "github.com/PavelShe11/studbridge/authMicro/utlis/token_generator"
@@ -104,9 +104,9 @@ func (g *grpcServiceClientsModule) Close(l logger.Logger) {
 
 type repositoriesModule struct {
 	db                            *sqlx.DB
-	registrationSessionRepository *repository.RegistrationSessionRepository
-	loginSessionRepository        *repository.LoginSessionRepository
-	refreshTokenSessionRepository *repository.RefreshTokenSessionRepository
+	registrationSessionRepository port.RegistrationSessionRepository
+	loginSessionRepository        port.LoginSessionRepository
+	refreshTokenSessionRepository port.RefreshTokenSessionRepository
 	trManager                     *manager.Manager
 }
 
@@ -129,9 +129,9 @@ func newRepositoriesModule(commonModule *commonModule) *repositoriesModule {
 
 	return &repositoriesModule{
 		db:                            db,
-		registrationSessionRepository: repository.NewRegistrationSessionRepository(db, trmsql.DefaultCtxGetter),
-		loginSessionRepository:        repository.NewLoginSessionRepository(db, trmsql.DefaultCtxGetter),
-		refreshTokenSessionRepository: repository.NewRefreshTokenSessionRepository(db, trmsql.DefaultCtxGetter),
+		registrationSessionRepository: repository2.NewRegistrationSessionRepository(db, trmsql.DefaultCtxGetter),
+		loginSessionRepository:        repository2.NewLoginSessionRepository(db, trmsql.DefaultCtxGetter),
+		refreshTokenSessionRepository: repository2.NewRefreshTokenSessionRepository(db, trmsql.DefaultCtxGetter),
 		trManager:                     trManager,
 	}
 }

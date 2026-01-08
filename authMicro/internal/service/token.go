@@ -7,14 +7,13 @@ import (
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
-	"github.com/PavelShe11/studbridge/authMicro/internal/repository"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/token_generator"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
 	"github.com/PavelShe11/studbridge/common/logger"
 )
 
 type TokenService struct {
-	refreshTokenSessionRepo *repository.RefreshTokenSessionRepository
+	refreshTokenSessionRepo port.RefreshTokenSessionRepository
 	accountProvider         port.AccountProvider
 	tokenGenerator          token_generator.TokenGenerator
 	logger                  logger.Logger
@@ -23,7 +22,7 @@ type TokenService struct {
 }
 
 func NewTokenService(
-	refreshTokenSessionRepo *repository.RefreshTokenSessionRepository,
+	refreshTokenSessionRepo port.RefreshTokenSessionRepository,
 	accountProvider port.AccountProvider,
 	tokenGenerator token_generator.TokenGenerator,
 	logger logger.Logger,

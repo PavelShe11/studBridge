@@ -6,24 +6,27 @@ import (
 	"errors"
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
+	"github.com/PavelShe11/studbridge/authMicro/internal/port"
 	trmsql "github.com/avito-tech/go-transaction-manager/drivers/sqlx/v2"
 	"github.com/jmoiron/sqlx"
 )
 
-type RefreshTokenSessionRepository struct {
+type refreshTokenSessionRepository struct {
 	db     *sqlx.DB
 	getter *trmsql.CtxGetter
 }
 
-func NewRefreshTokenSessionRepository(db *sqlx.DB, getter *trmsql.CtxGetter) *RefreshTokenSessionRepository {
-	return &RefreshTokenSessionRepository{
+var _ port.RefreshTokenSessionRepository = (*refreshTokenSessionRepository)(nil)
+
+func NewRefreshTokenSessionRepository(db *sqlx.DB, getter *trmsql.CtxGetter) port.RefreshTokenSessionRepository {
+	return &refreshTokenSessionRepository{
 		db:     db,
 		getter: getter,
 	}
 }
 
 // Save сохраняет новую сессию refresh token
-func (r *RefreshTokenSessionRepository) Save(
+func (r *refreshTokenSessionRepository) Save(
 	ctx context.Context,
 	session *entity.RefreshTokenSession,
 ) error {
@@ -42,7 +45,7 @@ func (r *RefreshTokenSessionRepository) Save(
 }
 
 // FindByToken находит сессию по токену
-func (r *RefreshTokenSessionRepository) FindByToken(
+func (r *refreshTokenSessionRepository) FindByToken(
 	ctx context.Context,
 	token string,
 ) (*entity.RefreshTokenSession, error) {
@@ -56,14 +59,14 @@ func (r *RefreshTokenSessionRepository) FindByToken(
 }
 
 // DeleteByToken удаляет сессию по токену
-func (r *RefreshTokenSessionRepository) DeleteByToken(ctx context.Context, token string) error {
+func (r *refreshTokenSessionRepository) DeleteByToken(ctx context.Context, token string) error {
 	query := `DELETE FROM refresh_token_session WHERE refresh_token = $1`
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query, token)
 	return err
 }
 
 // CleanExpired удаляет истекшие сессии
-func (r *RefreshTokenSessionRepository) CleanExpired(ctx context.Context) error {
+func (r *refreshTokenSessionRepository) CleanExpired(ctx context.Context) error {
 	query := `DELETE FROM refresh_token_session WHERE expires_at < NOW()`
 	_, err := r.getter.DefaultTrOrDB(ctx, r.db).ExecContext(ctx, query)
 	return err
