@@ -1,8 +1,8 @@
 package entity
 
 type Tokens struct {
-	AccessToken         string `json:"accessToken"`
-	AccessTokenExpires  int64  `json:"accessTokenExpires"`
-	RefreshToken        string `json:"refreshToken"`
-	RefreshTokenExpires int64  `json:"refreshTokenExpires"`
+	AccessToken         string
+	AccessTokenExpires  int64
+	RefreshToken        string
+	RefreshTokenExpires int64
 }

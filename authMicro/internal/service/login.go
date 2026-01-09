@@ -92,7 +92,7 @@ func (l *LoginService) createOrUpdateSession(ctx context.Context, email string, 
 			Email:       email,
 			Code:        code,
 			CodeExpires: time.Now().Add(l.CodeGenConfig.CodeTTL),
-			CreateAt:    time.Now(),
+			CreatedAt:   time.Now(),
 		}
 	} else {
 		accountIdChanged := (session.AccountId == nil && accountId != nil) ||

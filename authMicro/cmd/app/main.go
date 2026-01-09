@@ -21,7 +21,7 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
 	"github.com/PavelShe11/studbridge/authMicro/internal/service"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/interceptor"
-	jwtAdapter "github.com/PavelShe11/studbridge/authMicro/utlis/token_generator"
+	jwtAdapter "github.com/PavelShe11/studbridge/authMicro/utlis/tokenGenerator"
 	"github.com/PavelShe11/studbridge/common/logger"
 	"github.com/PavelShe11/studbridge/common/translator"
 	"github.com/PavelShe11/studbridge/common/validation"
@@ -31,6 +31,12 @@ import (
 	"google.golang.org/grpc/credentials/alts"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+/**
+TODO: Подумать над заведением отдельным моделей для хранилища.
+TODO: Добавить ошибку 403 при обновлении refreshToken с незарегистрированным refreshToken
+TODO: Добавить тесты
+*/
 
 type commonModule struct {
 	logger     logger.Logger

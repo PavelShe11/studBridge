@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"unicode"
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 
@@ -12,6 +13,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
+	"github.com/jmoiron/sqlx/reflectx"
 )
 
 func NewPostgresDB(cfg config.DBConfig) (*sqlx.DB, error) {
@@ -22,6 +24,11 @@ func NewPostgresDB(cfg config.DBConfig) (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// Configure automatic camelCase <-> snake_case mapping
+	db.Mapper = reflectx.NewMapperFunc("db", func(s string) string {
+		return toSnakeCase(s)
+	})
 
 	db.SetMaxOpenConns(20)
 	db.SetMaxIdleConns(5)
@@ -48,4 +55,25 @@ func InitSchema(db *sqlx.DB) error {
 		return fmt.Errorf("failed to create schema: %w", err)
 	}
 	return nil
+}
+
+func toSnakeCase(s string) string {
+	if s == "" {
+		return s
+	}
+
+	var result []rune
+	runes := []rune(s)
+
+	for i := 0; i < len(runes); i++ {
+		if i > 0 && unicode.IsUpper(runes[i]) {
+			if unicode.IsLower(runes[i-1]) ||
+				(i+1 < len(runes) && unicode.IsLower(runes[i+1])) {
+				result = append(result, '_')
+			}
+		}
+		result = append(result, unicode.ToLower(runes[i]))
+	}
+
+	return string(result)
 }

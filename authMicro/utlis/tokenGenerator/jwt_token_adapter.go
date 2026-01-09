@@ -1,4 +1,4 @@
-package token_generator
+package tokenGenerator
 
 import (
 	"fmt"

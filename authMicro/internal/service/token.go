@@ -7,7 +7,7 @@ import (
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
-	"github.com/PavelShe11/studbridge/authMicro/utlis/token_generator"
+	"github.com/PavelShe11/studbridge/authMicro/utlis/tokenGenerator"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
 	"github.com/PavelShe11/studbridge/common/logger"
 )
@@ -15,7 +15,7 @@ import (
 type TokenService struct {
 	refreshTokenSessionRepo port.RefreshTokenSessionRepository
 	accountProvider         port.AccountProvider
-	tokenGenerator          token_generator.TokenGenerator
+	tokenGenerator          tokenGenerator.TokenGenerator
 	logger                  logger.Logger
 	accessTokenTTL          time.Duration
 	refreshTokenTTL         time.Duration
@@ -24,7 +24,7 @@ type TokenService struct {
 func NewTokenService(
 	refreshTokenSessionRepo port.RefreshTokenSessionRepository,
 	accountProvider port.AccountProvider,
-	tokenGenerator token_generator.TokenGenerator,
+	tokenGenerator tokenGenerator.TokenGenerator,
 	logger logger.Logger,
 	accessTokenTTL time.Duration,
 	refreshTokenTTL time.Duration,
@@ -129,7 +129,7 @@ func (s *TokenService) generateTokenPair(
 	accessExpiry time.Time,
 ) (refreshToken string, accessToken string, err error) {
 
-	refreshClaims := token_generator.TokenClaims{
+	refreshClaims := tokenGenerator.TokenClaims{
 		Subject:   accountId,
 		IssuedAt:  now,
 		NotBefore: now,
@@ -142,7 +142,7 @@ func (s *TokenService) generateTokenPair(
 		return "", "", fmt.Errorf("failed to generate refresh token: %w", err)
 	}
 
-	accessClaims := token_generator.TokenClaims{
+	accessClaims := tokenGenerator.TokenClaims{
 		Subject:   accountId,
 		IssuedAt:  now,
 		NotBefore: now,

@@ -21,8 +21,8 @@ services:
 
   auth-service:
     build:
-      context: ./authMicro
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./authMicro/Dockerfile
       target: run-release
     container_name: auth-service
     environment:
@@ -72,8 +72,8 @@ services:
 
   user-service:
     build:
-      context: ./userMicro
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./userMicro/Dockerfile
       target: run-release
     container_name: user-service
     environment:

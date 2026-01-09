@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/PavelShe11/studbridge/authMicro/internal/api/rest/models"
 	"github.com/PavelShe11/studbridge/authMicro/internal/service"
 	"github.com/PavelShe11/studbridge/authMicro/internal/usecase"
 	"github.com/PavelShe11/studbridge/common/logger"
@@ -67,5 +68,5 @@ func (h *Login) ConfirmEmail(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, tokens)
+	return c.JSON(http.StatusOK, models.NewTokensResponse(tokens))
 }
