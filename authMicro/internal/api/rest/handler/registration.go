@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/PavelShe11/studbridge/authMicro/internal/api/rest/httpErrorHandler"
+	"github.com/PavelShe11/studbridge/authMicro/internal/api/rest/models"
 	"github.com/PavelShe11/studbridge/authMicro/internal/service"
 	"github.com/PavelShe11/studbridge/common/logger"
 	"github.com/PavelShe11/studbridge/common/translator" // Added translator import
@@ -42,7 +43,7 @@ func (h *Register) SendRegistrationCode(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, answer)
+	return c.JSON(http.StatusOK, models.NewRegistrationResponse(answer))
 }
 
 func (h *Register) RegistrationConfirmEmail(c echo.Context) error {

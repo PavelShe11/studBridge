@@ -16,8 +16,8 @@ import (
 )
 
 type LoginAnswer struct {
-	CodeExpires int64  `json:"code_expires"`
-	CodePattern string `json:"code_pattern"`
+	CodeExpires int64
+	CodePattern string
 }
 
 type ConfirmLoginEmailAnswer struct {

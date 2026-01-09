@@ -16,8 +16,8 @@ import (
 )
 
 type RegisterAnswer struct {
-	CodeExpires int64  `json:"codeExpires"`
-	CodePattern string `json:"codePattern"`
+	CodeExpires int64
+	CodePattern string
 }
 
 type RegistrationService struct {

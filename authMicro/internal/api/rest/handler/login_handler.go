@@ -45,7 +45,7 @@ func (h *Login) SendLoginCode(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, answer)
+	return c.JSON(http.StatusOK, models.NewLoginResponse(answer))
 }
 
 func (h *Login) ConfirmEmail(c echo.Context) error {
