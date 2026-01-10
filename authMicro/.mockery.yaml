@@ -1,0 +1,11 @@
+with-expecter: true
+dir: "test/mocks"
+packages:
+  github.com/PavelShe11/studbridge/authMicro/internal/port:
+    interfaces:
+      RegistrationSessionRepository:
+        config:
+          filename: "registration_session_repository_mock.go"
+      AccountProvider:
+        config:
+          filename: "account_provider_mock.go"
