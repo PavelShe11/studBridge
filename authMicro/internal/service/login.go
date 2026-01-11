@@ -8,6 +8,7 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
+	serviceErr "github.com/PavelShe11/studbridge/authMicro/internal/service/error"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/generator"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/hash"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
@@ -174,14 +175,14 @@ func (l *LoginService) validateConfirmLoginData(ctx context.Context, email strin
 		return nil, commonEntity.NewInternalError()
 	}
 	if session == nil {
-		return nil, entity.NewInvalidCodeError()
+		return nil, serviceErr.NewInvalidCodeError()
 	}
 	if session.CodeExpires.Before(time.Now()) {
-		return nil, entity.NewCodeExpiredError()
+		return nil, serviceErr.NewCodeExpiredError()
 	}
 
 	if code == "" || !hash.VerifyCode(session.Code, code) {
-		return nil, entity.NewInvalidCodeError()
+		return nil, serviceErr.NewInvalidCodeError()
 	}
 
 	return session.AccountId, nil
@@ -201,19 +202,19 @@ func (l *LoginService) ConfirmLogin(ctx context.Context, email string, code stri
 		return "", commonEntity.NewInternalError()
 	}
 	if session == nil {
-		return "", entity.NewInvalidCodeError()
+		return "", serviceErr.NewInvalidCodeError()
 	}
 	if session.CodeExpires.Before(time.Now()) {
-		return "", entity.NewCodeExpiredError()
+		return "", serviceErr.NewCodeExpiredError()
 	}
 	if code == "" || !hash.VerifyCode(session.Code, code) {
-		return "", entity.NewInvalidCodeError()
+		return "", serviceErr.NewInvalidCodeError()
 	}
 
 	accountId := session.AccountId
 
 	if accountId == nil {
-		return "", entity.NewInvalidCodeError()
+		return "", serviceErr.NewInvalidCodeError()
 	}
 
 	accountStillValid, _ := l.verifyAccountStillValid(ctx, email, *accountId)
@@ -225,7 +226,7 @@ func (l *LoginService) ConfirmLogin(ctx context.Context, email string, code stri
 
 	if !accountStillValid {
 		l.logger.Info(fmt.Sprintf("Account switch detected for email %s", email))
-		return "", entity.NewInvalidCodeError()
+		return "", serviceErr.NewInvalidCodeError()
 	}
 
 	return *accountId, nil

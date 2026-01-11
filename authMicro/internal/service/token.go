@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -20,6 +21,12 @@ type TokenService struct {
 	accessTokenTTL          time.Duration
 	refreshTokenTTL         time.Duration
 }
+
+var (
+	InvalidRefreshTokenError      = errors.New("invalidRefreshToken")
+	RefreshTokenExpiredError      = errors.New("refreshTokenExpired")
+	UnauthorizedRefreshTokenError = errors.New("unauthorizedRefreshToken")
+)
 
 func NewTokenService(
 	refreshTokenSessionRepo port.RefreshTokenSessionRepository,
@@ -93,7 +100,7 @@ func (s *TokenService) RefreshTokens(ctx context.Context, refreshTokenString str
 	parsedToken, err := s.tokenGenerator.ParseToken(refreshTokenString)
 	if err != nil || !parsedToken.Valid {
 		s.logger.Debug(err)
-		return nil, entity.NewInvalidRefreshTokenError()
+		return nil, InvalidRefreshTokenError
 	}
 
 	accountId := parsedToken.Subject
@@ -104,12 +111,12 @@ func (s *TokenService) RefreshTokens(ctx context.Context, refreshTokenString str
 		return nil, commonEntity.NewInternalError()
 	}
 	if session == nil {
-		return nil, entity.NewInvalidRefreshTokenError()
+		return nil, UnauthorizedRefreshTokenError
 	}
 
 	if session.ExpiresAt.Before(time.Now()) {
 		_ = s.refreshTokenSessionRepo.DeleteByToken(ctx, refreshTokenString)
-		return nil, entity.NewRefreshTokenExpiredError()
+		return nil, RefreshTokenExpiredError
 	}
 
 	var result *entity.Tokens

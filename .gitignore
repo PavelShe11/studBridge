@@ -1,7 +1,7 @@
 .idea
-.mcp.json
 CLAUDE.md
 DEVELOPMENT_RULES.md
 GEMINI.md
 .claude
 .gemini
+.worktrees

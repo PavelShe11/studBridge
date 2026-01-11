@@ -9,6 +9,7 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/config"
 	"github.com/PavelShe11/studbridge/authMicro/internal/entity"
 	"github.com/PavelShe11/studbridge/authMicro/internal/port"
+	serviceErr "github.com/PavelShe11/studbridge/authMicro/internal/service/error"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/generator"
 	"github.com/PavelShe11/studbridge/authMicro/utlis/hash"
 	commonEntity "github.com/PavelShe11/studbridge/common/entity"
@@ -125,15 +126,15 @@ func (r *RegistrationService) validateConfirmationCode(ctx context.Context, emai
 		return commonEntity.NewInternalError()
 	}
 	if session == nil {
-		return entity.NewInvalidCodeError()
+		return serviceErr.NewInvalidCodeError()
 	}
 	if session.CodeExpires.Before(time.Now()) {
-		return entity.NewCodeExpiredError()
+		return serviceErr.NewCodeExpiredError()
 	}
 
 	submittedCode, ok := userData["code"].(string)
 	if !ok || submittedCode == "" || !hash.VerifyCode(session.Code, submittedCode) {
-		return entity.NewInvalidCodeError()
+		return serviceErr.NewInvalidCodeError()
 	}
 
 	return nil

@@ -58,7 +58,7 @@ func (a *accountGrpcAdapter) ValidateAccountData(
 
 	// Конвертация gRPC error → domain error (используем существующую функцию из entity)
 	if response.Error != nil {
-		return entity.GrpcErrorMapToError(response.Error)
+		return GrpcErrorMapToError(response.Error)
 	}
 
 	return nil
@@ -82,7 +82,7 @@ func (a *accountGrpcAdapter) CreateAccount(ctx context.Context, userData map[str
 	}
 
 	if response.Error != nil {
-		return entity.GrpcErrorMapToError(response.Error)
+		return GrpcErrorMapToError(response.Error)
 	}
 
 	return nil
@@ -105,7 +105,7 @@ func (a *accountGrpcAdapter) GetAccountByEmail(ctx context.Context, email string
 	}
 
 	if grpcErr := response.GetError(); grpcErr != nil {
-		return nil, entity.GrpcErrorMapToError(grpcErr)
+		return nil, GrpcErrorMapToError(grpcErr)
 	}
 
 	// Аккаунт не найден
@@ -121,7 +121,7 @@ func (a *accountGrpcAdapter) GetAccessTokenPayload(ctx context.Context, accountI
 	}
 
 	if grpcErr := response.GetError(); grpcErr != nil {
-		return nil, entity.GrpcErrorMapToError(grpcErr)
+		return nil, GrpcErrorMapToError(grpcErr)
 	}
 
 	if claims := response.GetClaims(); claims != nil {

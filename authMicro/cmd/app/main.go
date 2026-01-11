@@ -33,8 +33,7 @@ import (
 )
 
 /**
-TODO: Добавить ошибку 403 при обновлении refreshToken с незарегистрированным refreshToken
-TODO: Подумать над запуском задачи по удалению истёгших сессий по таймеру
+TODO: Подумать над запуском задачи по удалению истёкших сессий по таймеру
 TODO: Добавить тесты
 */
 
@@ -43,6 +42,38 @@ type commonModule struct {
 	translator *translator.Translator
 	config     *config.Config
 	validator  *validation.Validator
+}
+
+type grpcServiceClientsModule struct {
+	conn                 *grpc.ClientConn
+	accountServiceClient grpcApi.AccountServiceClient
+}
+
+type repositoriesModule struct {
+	db                            *sqlx.DB
+	registrationSessionRepository port.RegistrationSessionRepository
+	loginSessionRepository        port.LoginSessionRepository
+	refreshTokenSessionRepository port.RefreshTokenSessionRepository
+	trManager                     *manager.Manager
+}
+
+type infrastructureModule struct {
+	accountProvider port.AccountProvider
+	tokenGenerator  jwtAdapter.TokenGenerator
+}
+
+type servicesModule struct {
+	registrationService *service.RegistrationService
+	loginService        *service.LoginService
+	tokenService        *service.TokenService
+}
+
+type app struct {
+	common       *commonModule
+	grpc         *grpcServiceClientsModule
+	repositories *repositoriesModule
+	services     *servicesModule
+	router       *rest.Router
 }
 
 func newCommonModule() *commonModule {
@@ -63,11 +94,6 @@ func newCommonModule() *commonModule {
 		config:     cfg,
 		validator:  v,
 	}
-}
-
-type grpcServiceClientsModule struct {
-	conn                 *grpc.ClientConn
-	accountServiceClient grpcApi.AccountServiceClient
 }
 
 func newGrpcServiceClientModule(commonModule *commonModule) *grpcServiceClientsModule {
@@ -108,14 +134,6 @@ func (g *grpcServiceClientsModule) Close(l logger.Logger) {
 	}
 }
 
-type repositoriesModule struct {
-	db                            *sqlx.DB
-	registrationSessionRepository port.RegistrationSessionRepository
-	loginSessionRepository        port.LoginSessionRepository
-	refreshTokenSessionRepository port.RefreshTokenSessionRepository
-	trManager                     *manager.Manager
-}
-
 func newRepositoriesModule(commonModule *commonModule) *repositoriesModule {
 	l := commonModule.logger
 	db, err := database.NewPostgresDB(commonModule.config.DB)
@@ -150,11 +168,6 @@ func (r *repositoriesModule) Close(l logger.Logger) {
 	}
 }
 
-type infrastructureModule struct {
-	accountProvider port.AccountProvider
-	tokenGenerator  jwtAdapter.TokenGenerator
-}
-
 func newInfrastructureModule(
 	commonModule *commonModule,
 	grpcServiceClientModule *grpcServiceClientsModule,
@@ -170,12 +183,6 @@ func newInfrastructureModule(
 		accountProvider: accountProvider,
 		tokenGenerator:  tokenGenerator,
 	}
-}
-
-type servicesModule struct {
-	registrationService *service.RegistrationService
-	loginService        *service.LoginService
-	tokenService        *service.TokenService
 }
 
 func newServicesModule(
@@ -211,14 +218,6 @@ func newServicesModule(
 			conf.JWT.RefreshTokenExpiration,
 		),
 	}
-}
-
-type app struct {
-	common       *commonModule
-	grpc         *grpcServiceClientsModule
-	repositories *repositoriesModule
-	services     *servicesModule
-	router       *rest.Router
 }
 
 func newApp() *app {
