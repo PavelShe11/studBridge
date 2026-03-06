@@ -163,7 +163,7 @@ studBridge/
 │
 ├── userMicro/                  # User service (gRPC server only)
 │   ├── cmd/app/main.go         # Точка входа
-│   └── internal/               # Та же hexagonal архитектура
+│   └── internal/               # Та же Clean Architecture
 │
 ├── common/                     # Shared библиотеки (logger, translator, errors)
 ├── dynamic/                    # Traefik dynamic config (routers, services)
@@ -173,7 +173,7 @@ studBridge/
 └── traefic.yml                 # Traefik static config
 ```
 
-### Архитектурные слои (Hexagonal Architecture)
+### Архитектурные слои (Clean Architecture)
 
 ```
 HTTP Request
