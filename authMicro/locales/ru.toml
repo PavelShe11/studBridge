@@ -1,3 +1,9 @@
+[emailVerificationSubject]
+other = "Ваш код подтверждения"
+
+[emailVerificationBody]
+other = "Ваш код подтверждения: {{.Code}}\nДействителен {{.Minutes}} минут."
+
 [invalidCode]
 other = "Неверный код"
 

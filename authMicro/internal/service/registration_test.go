@@ -40,9 +40,11 @@ func setupService(t *testing.T) (
 	*RegistrationService,
 	*mocks.MockRegistrationSessionRepository,
 	*mocks.MockAccountProvider,
+	*mocks.MockEmailSender,
 ) {
 	mockRepo := new(mocks.MockRegistrationSessionRepository)
 	mockProvider := new(mocks.MockAccountProvider)
+	mockEmailSender := new(mocks.MockEmailSender)
 	testLogger := newNoopLogger()
 
 	cfg := config.CodeGenConfig{
@@ -51,9 +53,9 @@ func setupService(t *testing.T) (
 		CodeTTL:       2 * time.Minute,
 	}
 
-	service := NewRegistrationService(mockRepo, mockProvider, testLogger, cfg)
+	service := NewRegistrationService(mockRepo, mockProvider, mockEmailSender, testLogger, cfg)
 
-	return service, mockRepo, mockProvider
+	return service, mockRepo, mockProvider, mockEmailSender
 }
 
 // TestRegister_NewUser_Success - new user, code generated
@@ -61,7 +63,7 @@ func TestRegister_NewUser_Success(t *testing.T) {
 	t.Parallel()
 
 	// ARRANGE
-	service, mockRepo, mockProvider := setupService(t)
+	service, mockRepo, mockProvider, mockEmailSender := setupService(t)
 
 	userData := fixtures.NewValidUserData()
 	userData["email"] = "newuser@test.com"
@@ -74,6 +76,7 @@ func TestRegister_NewUser_Success(t *testing.T) {
 		return s.Email == "newuser@test.com" && s.Code != ""
 	})).Return(nil)
 	mockRepo.On("CleanExpired", mock.Anything).Return(nil)
+	mockEmailSender.On("SendVerificationCode", mock.Anything, "newuser@test.com", mock.AnythingOfType("string"), "en").Return(nil)
 
 	// ACT
 	result, err := service.Register(context.Background(), userData, "en")
@@ -86,13 +89,14 @@ func TestRegister_NewUser_Success(t *testing.T) {
 
 	mockProvider.AssertExpectations(t)
 	mockRepo.AssertExpectations(t)
+	mockEmailSender.AssertExpectations(t)
 }
 
 // TestRegister_ExistingUser_EmptyCode - existing email, no code (anti-enumeration)
 func TestRegister_ExistingUser_EmptyCode(t *testing.T) {
 	t.Parallel()
 
-	service, mockRepo, mockProvider := setupService(t)
+	service, mockRepo, mockProvider, _ := setupService(t)
 
 	userData := map[string]any{
 		"email": "existing@test.com",
@@ -123,7 +127,7 @@ func TestRegister_ExistingUser_EmptyCode(t *testing.T) {
 func TestRegister_ValidationError_ReturnsError(t *testing.T) {
 	t.Parallel()
 
-	service, mockRepo, mockProvider := setupService(t)
+	service, mockRepo, mockProvider, _ := setupService(t)
 
 	userData := map[string]any{
 		"email": "invalid-email",
@@ -148,7 +152,7 @@ func TestRegister_ValidationError_ReturnsError(t *testing.T) {
 func TestConfirmRegistration_Success(t *testing.T) {
 	t.Parallel()
 
-	service, mockRepo, mockProvider := setupService(t)
+	service, mockRepo, mockProvider, _ := setupService(t)
 
 	plainCode := "123456"
 	hashedCode, _ := hash.HashCode(plainCode)
@@ -233,7 +237,7 @@ func TestConfirmRegistration_ValidationErrors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			service, mockRepo, mockProvider := setupService(t)
+			service, mockRepo, mockProvider, _ := setupService(t)
 
 			userData := map[string]any{
 				"email": "test@test.com",

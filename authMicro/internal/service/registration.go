@@ -24,6 +24,7 @@ type RegisterAnswer struct {
 type RegistrationService struct {
 	registrationSessionRepository port.RegistrationSessionRepository
 	accountProvider               port.AccountProvider
+	emailSender                   port.EmailSender
 	logger                        logger.Logger
 	CodeGenConfig                 config.CodeGenConfig
 }
@@ -31,12 +32,14 @@ type RegistrationService struct {
 func NewRegistrationService(
 	registrationSessionRepository port.RegistrationSessionRepository,
 	accountProvider port.AccountProvider,
+	emailSender port.EmailSender,
 	logger logger.Logger,
 	codeGenConfig config.CodeGenConfig,
 ) *RegistrationService {
 	return &RegistrationService{
 		registrationSessionRepository: registrationSessionRepository,
 		accountProvider:               accountProvider,
+		emailSender:                   emailSender,
 		logger:                        logger,
 		CodeGenConfig:                 codeGenConfig,
 	}
@@ -60,23 +63,32 @@ func (r *RegistrationService) Register(ctx context.Context, userData map[string]
 		return nil, err
 	}
 
-	var session *entity.RegistrationSession
+	var (
+		session       *entity.RegistrationSession
+		codeUpdated   bool
+		plaintextCode string
+	)
 
 	if account != nil {
-		session, err = r.createOrUpdateSession(ctx, email, "")
+		session, codeUpdated, err = r.createOrUpdateSession(ctx, email, "")
 	} else {
-		var plaintextCode string
 		plaintextCode, err = generator.Reggen(r.CodeGenConfig.CodePattern, r.CodeGenConfig.CodeMaxLength)
 		if err != nil {
 			r.logger.Error(err)
 			return nil, commonEntity.NewInternalError()
 		}
-		session, err = r.createOrUpdateSession(ctx, email, plaintextCode)
+		session, codeUpdated, err = r.createOrUpdateSession(ctx, email, plaintextCode)
 	}
 
 	if err != nil {
 		r.logger.Error(fmt.Errorf("failed to create or update session: %w", err))
 		return nil, commonEntity.NewInternalError()
+	}
+
+	if codeUpdated && plaintextCode != "" {
+		if err := r.emailSender.SendVerificationCode(ctx, email, plaintextCode, lang); err != nil {
+			r.logger.Error(fmt.Errorf("failed to send verification email: %w", err))
+		}
 	}
 
 	return &RegisterAnswer{
@@ -140,12 +152,12 @@ func (r *RegistrationService) validateConfirmationCode(ctx context.Context, emai
 	return nil
 }
 
-func (r *RegistrationService) createOrUpdateSession(ctx context.Context, email string, code string) (*entity.RegistrationSession, error) {
+func (r *RegistrationService) createOrUpdateSession(ctx context.Context, email string, code string) (*entity.RegistrationSession, bool, error) {
 	session, err := r.registrationSessionRepository.FindByEmail(ctx, email)
 
 	if err != nil {
 		r.logger.Error(err)
-		return nil, err
+		return nil, false, err
 	}
 
 	originalCode := code
@@ -153,7 +165,7 @@ func (r *RegistrationService) createOrUpdateSession(ctx context.Context, email s
 		code, err = hash.HashCode(code)
 		if err != nil {
 			r.logger.Error(fmt.Errorf("failed to hash verification code: %w", err))
-			return nil, commonEntity.NewInternalError()
+			return nil, false, commonEntity.NewInternalError()
 		}
 	}
 
@@ -168,17 +180,17 @@ func (r *RegistrationService) createOrUpdateSession(ctx context.Context, email s
 		session.Code = code
 		session.CodeExpires = time.Now().Add(r.CodeGenConfig.CodeTTL)
 	} else {
-		return session, nil
+		return session, false, nil
 	}
 
 	if err := r.registrationSessionRepository.Save(ctx, session); err != nil {
 		r.logger.Error(err)
-		return nil, err
+		return nil, false, err
 	}
 
 	debugSession := *session
 	debugSession.Code = originalCode
 	r.logger.Debug(debugSession)
 
-	return session, nil
+	return session, true, nil
 }

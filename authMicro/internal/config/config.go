@@ -18,12 +18,21 @@ type AccountServiceGrpcConfig struct {
 	InternalAPIKey string
 }
 
+type SmtpConfig struct {
+	Host     string
+	Port     int
+	Username string
+	Password string
+	From     string
+}
+
 type Config struct {
 	DB                 DBConfig
 	JWT                JWTConfig
 	HttpServerAddr     string
 	AccountServiceGrpc AccountServiceGrpcConfig
 	CodeGenConfig      CodeGenConfig
+	Smtp               SmtpConfig
 }
 
 type DBConfig struct {
@@ -66,6 +75,13 @@ func NewConfig() (*Config, []error) {
 			CodeTTL:       time.Duration(getEnvAsInt("CodeTTL", 120)) * time.Second,
 			CodePattern:   getEnv("CodePattern", "\\d{6}"),
 			CodeMaxLength: getEnvAsInt("CodeMaxLength", 6),
+		},
+		Smtp: SmtpConfig{
+			Host:     getEnvIsRequiredWithErrors("SMTP_HOST", &errors),
+			Port:     getEnvAsInt("SMTP_PORT", 587),
+			Username: getEnvIsRequiredWithErrors("SMTP_USERNAME", &errors),
+			Password: getEnvIsRequiredWithErrors("SMTP_PASSWORD", &errors),
+			From:     getEnvIsRequiredWithErrors("SMTP_FROM", &errors),
 		},
 	}, errors
 }

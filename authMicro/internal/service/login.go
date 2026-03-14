@@ -31,6 +31,7 @@ type ConfirmLoginEmailAnswer struct {
 type LoginService struct {
 	loginSessionRepository port.LoginSessionRepository
 	accountProvider        port.AccountProvider
+	emailSender            port.EmailSender
 	logger                 logger.Logger
 	CodeGenConfig          config.CodeGenConfig
 	validator              *validation.Validator
@@ -39,6 +40,7 @@ type LoginService struct {
 func NewLoginService(
 	loginSessionRepository port.LoginSessionRepository,
 	accountProvider port.AccountProvider,
+	emailSender port.EmailSender,
 	logger logger.Logger,
 	codeGenConfig config.CodeGenConfig,
 	validator *validation.Validator,
@@ -46,6 +48,7 @@ func NewLoginService(
 	return &LoginService{
 		loginSessionRepository: loginSessionRepository,
 		accountProvider:        accountProvider,
+		emailSender:            emailSender,
 		logger:                 logger,
 		CodeGenConfig:          codeGenConfig,
 		validator:              validator,
@@ -71,11 +74,11 @@ func (l *LoginService) verifyAccountStillValid(ctx context.Context, email string
 	return false, nil
 }
 
-func (l *LoginService) createOrUpdateSession(ctx context.Context, email string, accountId *string, code string) (*entity.LoginSession, error) {
-	session, err := l.loginSessionRepository.FindByEmail(ctx, email)
+func (l *LoginService) createOrUpdateSession(ctx context.Context, email string, accountId *string, code string) (session *entity.LoginSession, codeUpdated bool, err error) {
+	session, err = l.loginSessionRepository.FindByEmail(ctx, email)
 	if err != nil {
 		l.logger.Error(err)
-		return nil, err
+		return nil, false, err
 	}
 
 	originalCode := code
@@ -83,7 +86,7 @@ func (l *LoginService) createOrUpdateSession(ctx context.Context, email string, 
 		code, err = hash.HashCode(code)
 		if err != nil {
 			l.logger.Error(fmt.Errorf("failed to hash verification code: %w", err))
-			return nil, commonEntity.NewInternalError()
+			return nil, false, commonEntity.NewInternalError()
 		}
 	}
 
@@ -105,23 +108,23 @@ func (l *LoginService) createOrUpdateSession(ctx context.Context, email string, 
 			session.Code = code
 			session.CodeExpires = time.Now().Add(l.CodeGenConfig.CodeTTL)
 		} else {
-			return session, nil
+			return session, false, nil
 		}
 	}
 
 	if err := l.loginSessionRepository.Save(ctx, session); err != nil {
 		l.logger.Error(err)
-		return nil, err
+		return nil, false, err
 	}
 
 	debugSession := *session
 	debugSession.Code = originalCode
 	l.logger.Debug(debugSession)
 
-	return session, nil
+	return session, true, nil
 }
 
-func (l *LoginService) Login(ctx context.Context, email string) (*LoginAnswer, error) {
+func (l *LoginService) Login(ctx context.Context, email string, lang string) (*LoginAnswer, error) {
 	l.cleanupExpiredSessions(ctx)
 
 	errs := commonEntity.NewValidationError()
@@ -140,25 +143,35 @@ func (l *LoginService) Login(ctx context.Context, email string) (*LoginAnswer, e
 		accountId = &account.AccountId
 	}
 
-	var session *entity.LoginSession
+	var (
+		session       *entity.LoginSession
+		codeUpdated   bool
+		plaintextCode string
+	)
 
 	if accountId != nil {
-		plaintextCode, err := generator.Reggen(l.CodeGenConfig.CodePattern, l.CodeGenConfig.CodeMaxLength)
+		plaintextCode, err = generator.Reggen(l.CodeGenConfig.CodePattern, l.CodeGenConfig.CodeMaxLength)
 		if err != nil {
 			l.logger.Error(err)
 			return nil, commonEntity.NewInternalError()
 		}
 
-		session, err = l.createOrUpdateSession(ctx, email, accountId, plaintextCode)
+		session, codeUpdated, err = l.createOrUpdateSession(ctx, email, accountId, plaintextCode)
 		if err != nil {
 			l.logger.Error(fmt.Errorf("failed to create or update login session: %w", err))
 			return nil, commonEntity.NewInternalError()
 		}
 	} else {
-		session, err = l.createOrUpdateSession(ctx, email, nil, "")
+		session, codeUpdated, err = l.createOrUpdateSession(ctx, email, nil, "")
 		if err != nil {
 			l.logger.Error(err)
 			return nil, err
+		}
+	}
+
+	if codeUpdated && plaintextCode != "" {
+		if err := l.emailSender.SendVerificationCode(ctx, email, plaintextCode, lang); err != nil {
+			l.logger.Error(fmt.Errorf("failed to send verification email: %w", err))
 		}
 	}
 

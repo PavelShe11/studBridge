@@ -152,7 +152,9 @@ func setupE2E(t *testing.T) (*handler.Register, *mocks.MockAccountProvider, *ech
 		CodeMaxLength: 6,
 		CodeTTL:       2 * time.Minute,
 	}
-	realService := service.NewRegistrationService(repo, mockAccountProvider, testLogger, cfg)
+	mockEmailSender := new(mocks.MockEmailSender)
+	mockEmailSender.On("SendVerificationCode", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	realService := service.NewRegistrationService(repo, mockAccountProvider, mockEmailSender, testLogger, cfg)
 
 	// Real handler (translator not used in tested methods, pass nil)
 	h := handler.NewRegisterHandler(testLogger, realService, nil)

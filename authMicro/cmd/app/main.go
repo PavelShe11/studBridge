@@ -11,6 +11,7 @@ import (
 	"github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/inbound/rest"
 	handler2 "github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/inbound/rest/handler"
 	grpcAdapter "github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/outbound/grpc"
+	emailAdapter "github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/outbound/email"
 	"github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/outbound/repository"
 	"github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/outbound/repository/database"
 	"github.com/PavelShe11/studbridge/authMicro/internal/usecase"
@@ -61,6 +62,7 @@ type repositoriesModule struct {
 type infrastructureModule struct {
 	accountProvider port.AccountProvider
 	tokenGenerator  jwtAdapter.TokenGenerator
+	emailSender     port.EmailSender
 }
 
 type servicesModule struct {
@@ -180,9 +182,16 @@ func newInfrastructureModule(
 
 	tokenGenerator := jwtAdapter.NewJwtTokenAdapter(commonModule.config.JWT)
 
+	smtpEmailSender := emailAdapter.NewSmtpEmailSender(
+		commonModule.config.Smtp,
+		commonModule.translator,
+		commonModule.config.CodeGenConfig.CodeTTL,
+	)
+
 	return &infrastructureModule{
 		accountProvider: accountProvider,
 		tokenGenerator:  tokenGenerator,
+		emailSender:     smtpEmailSender,
 	}
 }
 
@@ -196,16 +205,20 @@ func newServicesModule(
 	validator := commonModule.validator
 	accountProvider := infrastructureModule.accountProvider
 
+	emailSender := infrastructureModule.emailSender
+
 	return &servicesModule{
 		registrationService: service.NewRegistrationService(
 			repositoriesModule.registrationSessionRepository,
 			accountProvider,
+			emailSender,
 			l,
 			conf.CodeGenConfig,
 		),
 		loginService: service.NewLoginService(
 			repositoriesModule.loginSessionRepository,
 			accountProvider,
+			emailSender,
 			l,
 			conf.CodeGenConfig,
 			validator,

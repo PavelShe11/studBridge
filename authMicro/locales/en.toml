@@ -1,3 +1,9 @@
+[emailVerificationSubject]
+other = "Your verification code"
+
+[emailVerificationBody]
+other = "Your verification code: {{.Code}}\nValid for {{.Minutes}} minutes."
+
 [invalidCode]
 other = "Invalid code"
 

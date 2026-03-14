@@ -8,6 +8,7 @@ import (
 
 	"net/http"
 
+	"github.com/PavelShe11/studbridge/authMicro/internal/infrastructure/inbound/rest/httpErrorHandler"
 	"github.com/labstack/echo/v4"
 )
 
@@ -52,7 +53,8 @@ func (h *Login) SendLoginCode(c echo.Context) error {
 	if !ok {
 		email = ""
 	}
-	var answer, err = h.loginService.Login(c.Request().Context(), email)
+	lang := httpErrorHandler.GetLangFromHeader(c)
+	var answer, err = h.loginService.Login(c.Request().Context(), email, lang)
 	if err != nil {
 		return err
 	}
